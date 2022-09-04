@@ -1,24 +1,17 @@
-mod ast;
-mod lexer;
-mod parser;
-mod token;
-
 use std::error::Error;
 
-use crate::lexer::*;
-use crate::parser::*;
-use crate::token::*;
+use crate::transpiler::{Lexer, Parser, Token};
+
+mod ast;
+mod transpiler;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let content = std::fs::read_to_string("test.rn")?;
-    let mut lexer = Lexer::new(&content);
+    let mut parser = Parser::new(&content);
 
-    loop {
-        match lexer.next_token() {
-            Token::EOF => break,
-            v => println!("{:?}", v),
-        }
-    }
+    let ast = parser.parse();
+
+    println!("{:#?}", ast);
 
     Ok(())
 }

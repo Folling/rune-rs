@@ -1,0 +1,111 @@
+use crate::ast::evaluative::Block;
+use crate::ast::typical::Type;
+use crate::ast::{Ident, Node};
+use crate::transpiler::ParseError::InvalidToken;
+use crate::transpiler::{util, ParseError};
+use crate::{Lexer, Token};
+use std::error::Error;
+
+#[derive(Debug)]
+pub struct FuncArg<'a> {
+    ident: Ident<'a>,
+    r#type: Type<'a>,
+}
+
+#[derive(Debug)]
+pub struct FuncProto<'a> {
+    pub(crate) ident: Ident<'a>,
+    pub(crate) args: Vec<FuncArg<'a>>,
+    pub(crate) ret: Type<'a>,
+}
+
+#[derive(Debug)]
+pub struct FuncDecl<'a> {
+    pub(crate) proto: FuncProto<'a>,
+    pub(crate) body: Block<'a>,
+}
+
+impl<'a> Node<'a> for FuncDecl<'a> {
+    fn generate(&self, content: &mut String) {}
+
+    fn valid(&self) -> bool {
+        self.proto.valid() && self.body.valid()
+    }
+
+    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    where
+        Self: Sized,
+    {
+        Ok(FuncDecl {
+            proto: FuncProto::parse(lexer)?,
+            body: Block::parse(lexer)?,
+        })
+    }
+}
+
+impl<'a> Node<'a> for FuncProto<'a> {
+    fn generate(&self, content: &mut String) {}
+
+    fn valid(&self) -> bool {
+        self.ident.valid() && self.args.iter().all(Node::valid) && self.ret.valid()
+    }
+
+    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    where
+        Self: Sized,
+    {
+        let ident = Ident::parse(lexer)?;
+
+        util::exp_cur_next_tok(lexer, Token::Special("("))?;
+
+        let mut args = vec![];
+
+        loop {
+            match lexer.cur() {
+                None => return Err(ParseError::PrematureEOF),
+                Some(Token::Special(",")) => {
+                    lexer.next_cur();
+                    continue;
+                }
+                Some(Token::Special(")")) => {
+                    lexer.next_cur();
+                    break;
+                }
+                Some(Token::Textual(_)) => args.push(FuncArg::parse(lexer)?),
+                Some(v) => {
+                    return Err(ParseError::InvalidToken {
+                        got: v,
+                        expected: vec![Token::Special(","), Token::Special(")"), Token::Textual("any text")],
+                    })
+                }
+            }
+        }
+
+        util::exp_cur_next_tok(lexer, Token::Special("->"))?;
+
+        let ret = Type::parse(lexer)?;
+
+        Ok(FuncProto { ident, args, ret })
+    }
+}
+
+impl<'a> Node<'a> for FuncArg<'a> {
+    fn generate(&self, content: &mut String) {}
+
+    fn valid(&self) -> bool {
+        self.ident.valid() && self.r#type.valid()
+    }
+
+    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    where
+        Self: Sized,
+    {
+        let ident = Ident::parse(lexer)?;
+
+        util::exp_cur_next_tok(lexer, Token::Special(":"))?;
+
+        let r#type = Type::parse(lexer)?;
+
+        Ok(FuncArg { ident, r#type })
+    }
+}

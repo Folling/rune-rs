@@ -1,48 +1,7 @@
-use io.print;
+use io;
 
-main: (int, String[]) -> u32 = { argc, argv ->
-    [0..10]
-        .skip(2)
-        .chunks(3)
-        .each {
-        print it
-    }
-    x |= 5;
+fn main() -> int {
+    println("Hello World\n");
 
-    iter {
-        range: {
-            from: 0,
-            to: 10,
-            step: 2
-        },
-    };
-
-    cond.then {
-        print 'a'
-    } or cond2 && cond3 then {
-
-    }
-
-    if cond {
-        print('a');
-    } else if cond2 {
-
-    } else {
-
-    }
-
-    loop {
-        iter: i
-        each: {
-            print i
-        }
-        all_but_last: {
-            branch {
-                conds: [
-                    when: i.divisible_by(2)
-                    then: print("even")
-                ]
-            }
-        }
-    }
+    return 0;
 }

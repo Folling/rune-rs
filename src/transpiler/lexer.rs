@@ -1,25 +1,28 @@
 use std::collections::HashSet;
 
+use crate::transpiler::ParseError;
 use crate::Token;
 
 pub struct Lexer<'a> {
-    content: &'a String,
+    content: &'a str,
     idx: usize,
     specials: HashSet<&'static str>,
+    current_token: Option<Token<'a>>,
 }
 
 impl<'a> Lexer<'a> {
-    pub fn new(content: &String) -> Lexer {
+    pub fn new(content: &'a str) -> Lexer<'a> {
         Lexer {
             content,
             idx: 0,
             specials: [
                 "<", ">", "=", "==", "!=", "<=>", "<=", ">=", "<<", ">>", "<<=", ">>=", "&", "|", "^", "&&", "||", "^^", "&=", "|=", "^=",
                 "&&=", "||=", "^^=", "!", "-", "+", "/", "*", "&", "**", "//", "+=", "-=", "*=", "/=", "%=", "**=", "//=", "$", "\"", "\'",
-                "#", ",", ".", "->", "(", ")", "[", "]", "{", "}",
+                "#", ",", ".", ":", "::", "->", "(", ")", "[", "]", "{", "}", "?",
             ]
             .into_iter()
             .collect(),
+            current_token: None,
         }
     }
 
@@ -55,18 +58,18 @@ impl<'a> Lexer<'a> {
 
     fn predicate<F: Fn(char) -> bool>(&mut self, f: F) -> bool {
         if let Some(next) = self.peek_char() {
-            if f(next) {
+            return if f(next) {
                 self.consume_char(next);
-                return true;
+                true
             } else {
-                return false;
-            }
+                false
+            };
         }
 
         false
     }
 
-    pub fn next_token(&mut self) -> Token {
+    fn next(&mut self) -> Option<Token<'a>> {
         while self.predicate(char::is_whitespace) {}
 
         let start = self.idx;
@@ -77,7 +80,7 @@ impl<'a> Lexer<'a> {
             if next.is_alphanumeric() {
                 while self.predicate(char::is_alphanumeric) {}
 
-                return Token::Textual(unsafe { self.content.get_unchecked(start..self.idx) });
+                Some(Token::Textual(unsafe { self.content.get_unchecked(start..self.idx) }))
             } else {
                 match self.peek_char() {
                     Some(c)
@@ -92,10 +95,28 @@ impl<'a> Lexer<'a> {
                     _ => {}
                 }
 
-                return Token::Special(unsafe { self.content.get_unchecked(start..self.idx) });
+                Some(Token::Special(unsafe { self.content.get_unchecked(start..self.idx) }))
             }
         } else {
-            return Token::EOF;
+            None
         }
+    }
+
+    pub fn cur_next(&mut self) -> Option<Token<'a>> {
+        let ret = self.current_token;
+
+        self.current_token = self.next();
+
+        ret
+    }
+
+    pub fn next_cur(&mut self) -> Option<Token<'a>> {
+        self.current_token = self.next();
+
+        self.current_token
+    }
+
+    pub fn cur(&self) -> Option<Token<'a>> {
+        self.current_token
     }
 }
