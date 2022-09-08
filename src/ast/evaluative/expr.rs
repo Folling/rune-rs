@@ -1,6 +1,7 @@
+use crate::ast::evaluative::literal::Literal;
 use crate::ast::{Ident, Node};
 use crate::transpiler::ParseError;
-use crate::Lexer;
+use crate::{Lexer, Token};
 
 #[derive(Debug)]
 pub enum Expr<'a> {
@@ -9,9 +10,12 @@ pub enum Expr<'a> {
         args: Vec<Expr<'a>>,
     },
     MethodCall {
-        subj: Ident<'a>,
+        subj: Box<Expr<'a>>,
         ident: Ident<'a>,
         args: Vec<Expr<'a>>,
+    },
+    Literal {
+        value: Literal<'a>,
     },
 }
 
@@ -22,6 +26,7 @@ impl<'a> Node<'a> for Expr<'a> {
         match self {
             Expr::FuncCall { ident, args } => ident.valid() && args.iter().all(Node::valid),
             Expr::MethodCall { subj, ident, args } => subj.valid() && ident.valid() && args.iter().all(Node::valid),
+            Expr::Literal { value } => value.valid(),
         }
     }
 
@@ -29,12 +34,24 @@ impl<'a> Node<'a> for Expr<'a> {
     where
         Self: Sized,
     {
-        Ok(Expr::FuncCall {
-            ident: Ident {
-                raw: false,
-                name: "println",
-            },
-            args: vec![],
-        })
+        match lexer.cur() {
+            None => return Err(ParseError::PrematureEOF),
+            Some(Token::Special("'")) => Ok(Expr::Literal {
+                value: Literal::parse(lexer)?,
+            }),
+            Some(Token::Special("\"")) => Ok(Expr::Literal {
+                value: Literal::parse(lexer)?,
+            }),
+            Some(Token::Special("[")) => Ok(Expr::Literal {
+                value: Literal::parse(lexer)?,
+            }),
+            Some(Token::Special("|")) => Ok(Expr::Literal {
+                value: Literal::parse(lexer)?,
+            }),
+            Some(Token::Textual(v)) if matches!(v.chars().next(), Some(c) if c.is_ascii_digit()) => Ok(Expr::Literal {
+                value: Literal::parse(lexer)?,
+            }),
+            Some(v) => todo!(),
+        }
     }
 }

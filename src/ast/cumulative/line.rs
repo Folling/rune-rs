@@ -30,9 +30,12 @@ impl<'a> Node<'a> for Line<'a> {
     {
         match lexer.cur_next() {
             None => return Err(ParseError::PrematureEOF),
-            Some(Token::Textual("return")) => match lexer.next_cur() {
+            Some(Token::Textual("return")) => match lexer.cur() {
                 None => return Err(ParseError::PrematureEOF),
-                Some(Token::Special(";")) => Ok(Line::Return(None)),
+                Some(Token::Special(";")) => {
+                    lexer.next_cur();
+                    Ok(Line::Return(None))
+                }
                 _ => Ok(Line::Return(Some(Expr::parse(lexer)?))),
             },
             Some(Token::Textual("var")) => Ok(Line::VarDecl(VarDecl::parse(lexer)?)),

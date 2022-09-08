@@ -5,7 +5,10 @@ use crate::Token;
 
 pub struct Lexer<'a> {
     content: &'a str,
+    token_idx: usize,
     idx: usize,
+    live_pos: (usize, usize),
+    last_token_pos: (usize, usize),
     specials: HashSet<&'static str>,
     current_token: Option<Token<'a>>,
 }
@@ -14,11 +17,14 @@ impl<'a> Lexer<'a> {
     pub fn new(content: &'a str) -> Lexer<'a> {
         Lexer {
             content,
+            token_idx: 0,
             idx: 0,
+            live_pos: (0, 0),
+            last_token_pos: (0, 0),
             specials: [
                 "<", ">", "=", "==", "!=", "<=>", "<=", ">=", "<<", ">>", "<<=", ">>=", "&", "|", "^", "&&", "||", "^^", "&=", "|=", "^=",
                 "&&=", "||=", "^^=", "!", "-", "+", "/", "*", "&", "**", "//", "+=", "-=", "*=", "/=", "%=", "**=", "//=", "$", "\"", "\'",
-                "#", ",", ".", ":", "::", "->", "(", ")", "[", "]", "{", "}", "?",
+                "#", ",", ".", "..", ":", "::", "->", "(", ")", "[", "]", "{", "}", "?",
             ]
             .into_iter()
             .collect(),
@@ -26,7 +32,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    fn peek_char(&mut self) -> Option<char> {
+    pub fn peek_char(&mut self) -> Option<char> {
         match self.content.as_bytes().get(self.idx) {
             Some(byte) => {
                 let count = byte.leading_ones().max(1) as usize;
@@ -53,7 +59,15 @@ impl<'a> Lexer<'a> {
     }
 
     fn consume_char(&mut self, c: char) {
+        println!("{}", c);
         self.idx += c.len_utf8();
+
+        if c == '\n' {
+            self.live_pos.0 = 0;
+            self.live_pos.1 += 1;
+        } else {
+            self.live_pos.0 += 1;
+        }
     }
 
     fn predicate<F: Fn(char) -> bool>(&mut self, f: F) -> bool {
@@ -70,7 +84,11 @@ impl<'a> Lexer<'a> {
     }
 
     fn next(&mut self) -> Option<Token<'a>> {
+        self.last_token_pos = self.live_pos;
+
         while self.predicate(char::is_whitespace) {}
+
+        self.token_idx = self.idx;
 
         let start = self.idx;
 
@@ -102,6 +120,18 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    fn peek(&mut self) -> Option<Token<'a>> {
+        let idx = self.idx;
+        let live_pos = self.live_pos;
+
+        let ret = self.next();
+
+        self.idx = idx;
+        self.live_pos = live_pos;
+
+        ret
+    }
+
     pub fn cur_next(&mut self) -> Option<Token<'a>> {
         let ret = self.current_token;
 
@@ -118,5 +148,21 @@ impl<'a> Lexer<'a> {
 
     pub fn cur(&self) -> Option<Token<'a>> {
         self.current_token
+    }
+
+    pub unsafe fn get_from_to_unchecked(&self, from: usize, to: usize) -> &'a str {
+        self.content.get_unchecked(from..to)
+    }
+
+    pub fn token_idx(&self) -> usize {
+        self.token_idx
+    }
+
+    pub fn idx(&self) -> usize {
+        self.idx
+    }
+
+    pub fn pos(&self) -> (usize, usize) {
+        self.last_token_pos
     }
 }

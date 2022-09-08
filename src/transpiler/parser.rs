@@ -23,7 +23,11 @@ impl<'a> Parser<'a> {
             ast.root_nodes.push(match TopLevelExpression::parse(&mut self.lexer) {
                 Ok(v) => v,
                 Err(err) => {
-                    return Err(ParseErrorInfo { line: 0, column: 0, err });
+                    return Err(ParseErrorInfo {
+                        line: self.lexer.pos().1,
+                        column: self.lexer.pos().0,
+                        err,
+                    });
                 }
             })
         }
