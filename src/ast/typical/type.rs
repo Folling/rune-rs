@@ -28,8 +28,10 @@ impl<'a> Node<'a> for Type<'a> {
     fn valid(&self) -> bool {
         true
     }
+}
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> Type<'a> {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {

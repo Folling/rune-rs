@@ -22,8 +22,10 @@ impl<'a> Node<'a> for IfElseChain<'a> {
     fn valid(&self) -> bool {
         self.r#if.valid() && self.else_ifs.iter().all(Node::valid) && matches!(self.r#else.as_ref(), Some(x) if x.valid())
     }
+}
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> IfElseChain<'a> {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {
@@ -37,8 +39,10 @@ impl<'a> Node<'a> for CondBlock<'a> {
     fn valid(&self) -> bool {
         self.cond.valid() && self.block.valid()
     }
+}
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> CondBlock<'a> {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {

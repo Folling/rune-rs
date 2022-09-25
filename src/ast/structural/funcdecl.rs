@@ -1,16 +1,11 @@
 use crate::ast::evaluative::Block;
+use crate::ast::structural::FuncArg;
 use crate::ast::typical::Type;
 use crate::ast::{Ident, Node};
 use crate::transpiler::ParseError::InvalidToken;
 use crate::transpiler::{util, ParseError};
 use crate::{Lexer, Token};
 use std::error::Error;
-
-#[derive(Debug)]
-pub struct FuncArg<'a> {
-    ident: Ident<'a>,
-    r#type: Type<'a>,
-}
 
 #[derive(Debug)]
 pub struct FuncProto<'a> {
@@ -31,8 +26,10 @@ impl<'a> Node<'a> for FuncDecl<'a> {
     fn valid(&self) -> bool {
         self.proto.valid() && self.body.valid()
     }
+}
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> FuncDecl<'a> {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {
@@ -49,8 +46,10 @@ impl<'a> Node<'a> for FuncProto<'a> {
     fn valid(&self) -> bool {
         self.ident.valid() && self.args.iter().all(Node::valid) && self.ret.valid()
     }
+}
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> FuncProto<'a> {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {
@@ -86,26 +85,5 @@ impl<'a> Node<'a> for FuncProto<'a> {
         let ret = Type::parse(lexer)?;
 
         Ok(FuncProto { ident, args, ret })
-    }
-}
-
-impl<'a> Node<'a> for FuncArg<'a> {
-    fn generate(&self, content: &mut String) {}
-
-    fn valid(&self) -> bool {
-        self.ident.valid() && self.r#type.valid()
-    }
-
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
-    where
-        Self: Sized,
-    {
-        let ident = Ident::parse(lexer)?;
-
-        util::exp_cur_next_tok(lexer, Token::Special(":"))?;
-
-        let r#type = Type::parse(lexer)?;
-
-        Ok(FuncArg { ident, r#type })
     }
 }

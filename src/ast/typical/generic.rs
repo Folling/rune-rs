@@ -24,8 +24,10 @@ impl<'a> Node<'a> for Generic<'a> {
             Generic::Expression(v) => v.valid(),
         }
     }
+}
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> Generic<'a> {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {
@@ -39,8 +41,10 @@ impl<'a> Node<'a> for GenericType<'a> {
     fn valid(&self) -> bool {
         self.r#type.valid()
     }
+}
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> GenericType {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {

@@ -24,8 +24,10 @@ impl<'a> Node<'a> for StructDecl<'a> {
     fn valid(&self) -> bool {
         self.ident.valid() && self.fields.iter().all(|(i, t)| i.valid() && t.valid())
     }
+}
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> StructDecl {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {

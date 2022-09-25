@@ -5,7 +5,7 @@ use crate::transpiler::ParseError;
 use crate::{Lexer, Token};
 
 #[derive(Debug)]
-pub enum TopLevelExpression<'a> {
+pub enum TopLevelExpr<'a> {
     StructDecl(StructDecl<'a>),
     StructImpl(StructImpl<'a>),
     FuncDecl(FuncDecl<'a>),
@@ -13,30 +13,32 @@ pub enum TopLevelExpression<'a> {
     UseDecl(UseDecl<'a>),
 }
 
-impl<'a> Node<'a> for TopLevelExpression<'a> {
+impl<'a> Node<'a> for TopLevelExpr<'a> {
     fn generate(&self, content: &mut String) {}
 
     fn valid(&self) -> bool {
         match self {
-            TopLevelExpression::StructDecl(v) => v.valid(),
-            TopLevelExpression::StructImpl(v) => v.valid(),
-            TopLevelExpression::FuncDecl(v) => v.valid(),
-            TopLevelExpression::TraitDecl(v) => v.valid(),
-            TopLevelExpression::UseDecl(v) => v.valid(),
+            TopLevelExpr::StructDecl(v) => v.valid(),
+            TopLevelExpr::StructImpl(v) => v.valid(),
+            TopLevelExpr::FuncDecl(v) => v.valid(),
+            TopLevelExpr::TraitDecl(v) => v.valid(),
+            TopLevelExpr::UseDecl(v) => v.valid(),
         }
     }
+}
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> TopLevelExpr<'a> {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {
         match lexer.cur_next() {
             None => Err(ParseError::PrematureEOF),
-            Some(Token::Textual("fn")) => Ok(TopLevelExpression::FuncDecl(FuncDecl::parse(lexer)?)),
-            Some(Token::Textual("struct")) => Ok(TopLevelExpression::StructDecl(StructDecl::parse(lexer)?)),
-            Some(Token::Textual("trait")) => Ok(TopLevelExpression::TraitDecl(TraitDecl::parse(lexer)?)),
-            Some(Token::Textual("impl")) => Ok(TopLevelExpression::StructImpl(StructImpl::parse(lexer)?)),
-            Some(Token::Textual("use")) => Ok(TopLevelExpression::UseDecl(UseDecl::parse(lexer)?)),
+            Some(Token::Textual("fn")) => Ok(TopLevelExpr::FuncDecl(FuncDecl::parse(lexer)?)),
+            Some(Token::Textual("struct")) => Ok(TopLevelExpr::StructDecl(StructDecl::parse(lexer)?)),
+            Some(Token::Textual("trait")) => Ok(TopLevelExpr::TraitDecl(TraitDecl::parse(lexer)?)),
+            Some(Token::Textual("impl")) => Ok(TopLevelExpr::StructImpl(StructImpl::parse(lexer)?)),
+            Some(Token::Textual("use")) => Ok(TopLevelExpr::UseDecl(UseDecl::parse(lexer)?)),
             Some(v) => Err(ParseError::InvalidToken {
                 got: v,
                 expected: vec![

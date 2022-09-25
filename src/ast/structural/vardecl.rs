@@ -19,8 +19,10 @@ impl<'a> Node<'a> for VarDecl<'a> {
             && (self.r#type.is_none() || matches!(&self.r#type, Some(v) if v.valid()))
             && (self.assignment.is_none() || matches!(&self.assignment, Some(v) if v.valid()))
     }
+}
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> VarDecl<'a> {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {

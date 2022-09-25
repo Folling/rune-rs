@@ -59,7 +59,6 @@ impl<'a> Lexer<'a> {
     }
 
     fn consume_char(&mut self, c: char) {
-        println!("{}", c);
         self.idx += c.len_utf8();
 
         if c == '\n' {

@@ -14,8 +14,10 @@ impl<'a> Node<'a> for UseDecl<'a> {
     fn valid(&self) -> bool {
         self.path.iter().all(Node::valid)
     }
+}
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> UseDecl {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {

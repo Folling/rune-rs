@@ -1,3 +1,6 @@
+#![feature(once_cell)]
+#![feature(char_indices_offset)]
+
 use crate::ast::Ast;
 use std::error::Error;
 

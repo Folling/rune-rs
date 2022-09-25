@@ -1,5 +1,5 @@
 pub use crate::ast::Ast;
-use crate::ast::{Node, TopLevelExpression};
+use crate::ast::{Node, TopLevelExpr};
 pub use crate::transpiler::errors::{ParseError, ParseErrorInfo};
 pub use crate::transpiler::Lexer;
 
@@ -20,7 +20,7 @@ impl<'a> Parser<'a> {
         self.lexer.next_cur();
 
         while self.lexer.cur().is_some() {
-            ast.root_nodes.push(match TopLevelExpression::parse(&mut self.lexer) {
+            ast.root_nodes.push(match TopLevelExpr::parse(&mut self.lexer) {
                 Ok(v) => v,
                 Err(err) => {
                     return Err(ParseErrorInfo {

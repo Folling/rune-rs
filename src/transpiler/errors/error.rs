@@ -17,10 +17,26 @@ impl<'a> Display for ParseErrorInfo<'a> {
 impl<'a> std::error::Error for ParseErrorInfo<'a> {}
 
 #[derive(Debug)]
+pub enum LiteralType {
+    Char,
+    String,
+    Numeric,
+    Tuple,
+    Lambda,
+}
+
+#[derive(Debug)]
 pub enum ParseError<'a> {
     PrematureEOF,
-    InvalidToken { got: Token<'a>, expected: Vec<Token<'a>> },
-    InvalidLiteral { got: &'a str, expected: &'static str },
+    InvalidToken {
+        got: Token<'a>,
+        expected: Vec<Token<'a>>,
+    },
+    InvalidLiteral {
+        r#type: LiteralType,
+        got: &'a str,
+        expected: &'static str,
+    },
 }
 
 impl<'a> Display for ParseError<'a> {

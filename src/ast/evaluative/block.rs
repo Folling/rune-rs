@@ -13,8 +13,10 @@ impl<'a> Node<'a> for Block<'a> {
     fn valid(&self) -> bool {
         true
     }
+}
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> Block<'a> {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {
@@ -36,6 +38,8 @@ impl<'a> Node<'a> for Block<'a> {
                 v => lines.push(Line::parse(lexer)?),
             }
         }
+
+        util::exp_cur_next_tok(lexer, Token::Special(";"))?;
 
         Ok(Block { lines })
     }

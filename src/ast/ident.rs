@@ -16,8 +16,10 @@ impl<'a> Node<'a> for Ident<'a> {
     fn valid(&self) -> bool {
         true
     }
+}
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> Ident<'a> {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {
@@ -26,6 +28,7 @@ impl<'a> Node<'a> for Ident<'a> {
                 got: Token::Special(v),
                 expected: vec![Token::Textual("any text")],
             }),
+            // FIXME, this needs to be separate, r# will be parsed as [r, #]
             Some(Token::Textual(v)) => Ok(Ident {
                 raw: v.starts_with("r#"),
                 name: v,

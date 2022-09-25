@@ -23,8 +23,10 @@ impl<'a> Node<'a> for Line<'a> {
             Line::VarDecl(v) => v.valid(),
         }
     }
+}
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> Line<'a> {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {

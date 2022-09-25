@@ -21,8 +21,10 @@ impl<'a> Node<'a> for TraitDecl<'a> {
     fn valid(&self) -> bool {
         self.ident.valid() && self.funcs.iter().all(Node::valid)
     }
+}
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> TraitDecl<'a> {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {
@@ -40,7 +42,7 @@ impl<'a> Node<'a> for TraitFunction<'a> {
         }
     }
 
-    fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
     where
         Self: Sized,
     {
