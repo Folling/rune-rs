@@ -97,7 +97,10 @@ impl<'a> Lexer<'a> {
             if next.is_alphanumeric() {
                 while self.predicate(char::is_alphanumeric) {}
 
-                Some(Token::Textual(unsafe { self.content.get_unchecked(start..self.idx) }))
+                Some(Token::Textual {
+                    value: unsafe { self.content.get_unchecked(start..self.idx) },
+                    loc: (self.token_idx, self.idx),
+                })
             } else {
                 match self.peek_char() {
                     Some(c)
@@ -112,7 +115,10 @@ impl<'a> Lexer<'a> {
                     _ => {}
                 }
 
-                Some(Token::Special(unsafe { self.content.get_unchecked(start..self.idx) }))
+                Some(Token::Special {
+                    value: unsafe { self.content.get_unchecked(start..self.idx) },
+                    loc: (self.token_idx, self.idx),
+                })
             }
         } else {
             None

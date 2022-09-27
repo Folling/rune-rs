@@ -43,7 +43,7 @@ impl<'a> Expr<'a> {
             None => return Err(ParseError::PrematureEOF),
             Some(Token::Special { value: "'", .. }) => Ok(Expr::CharLiteral(CharLit::parse(lexer)?)),
             Some(Token::Special { value: "\"", .. }) => Ok(Expr::StringLiteral(StringLit::parse(lexer)?)),
-            Some(Token::Textual { value, idx }) if matches!(value.chars().next(), Some('0'..'9')) => {
+            Some(Token::Textual { value, loc: idx }) if matches!(value.chars().next(), Some('0'..'9')) => {
                 Ok(Expr::NumericLiteral(NumericLit::parse(lexer, value, idx)?))
             }
             Some(Token::Special { value: "[", .. }) => Ok(Expr::TupleLiteral(TupleLit::parse(lexer)?)),

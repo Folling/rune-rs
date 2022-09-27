@@ -2,8 +2,8 @@ use crate::transpiler::ExpectedToken;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Token<'a> {
-    Textual { idx: usize, value: &'a str },
-    Special { idx: usize, value: &'a str },
+    Textual { loc: (usize, usize), value: &'a str },
+    Special { loc: (usize, usize), value: &'a str },
 }
 
 impl<'a> Token {

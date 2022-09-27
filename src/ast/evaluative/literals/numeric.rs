@@ -24,7 +24,7 @@ impl<'a> NumericLit<'a> {
             None => return Err(ParseError::PrematureEOF),
             Some(Token::Special { value: ".", .. }) => match lexer.peek() {
                 None => return Err(ParseError::PrematureEOF),
-                Some(Token::Textual { value, idx }) if matches!(value.chars().next(), Some(c) if c.is_ascii_digit()) => {}
+                Some(Token::Textual { value, loc: idx }) if matches!(value.chars().next(), Some(c) if c.is_ascii_digit()) => {}
                 _ => {
                     return Err(ParseError::InvalidLiteral {
                         r#type: LiteralType::Numeric,
