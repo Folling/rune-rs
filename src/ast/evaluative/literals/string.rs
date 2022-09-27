@@ -1,5 +1,5 @@
 use crate::ast::Node;
-use crate::transpiler::{util, ParseError};
+use crate::transpiler::{util, ExpectedToken, ParseError};
 use crate::{Lexer, Token};
 
 #[derive(Debug)]
@@ -24,16 +24,16 @@ impl<'a> StringLit<'a> {
     {
         let value = match lexer.cur_next() {
             None => return Err(ParseError::PrematureEOF),
-            Some(Token::Textual(str)) => str,
+            Some(Token::Textual { value: str, .. }) => str,
             Some(v) => {
                 return Err(ParseError::InvalidToken {
                     got: v,
-                    expected: vec![Token::Textual("any valid text")],
+                    expected: vec![ExpectedToken::Textual { regex: "any valid text" }],
                 })
             }
         };
 
-        util::exp_cur_next_tok(lexer, Token::Textual("\""))?;
+        util::exp_cur_next_sp_tok(lexer, "\"")?;
 
         Ok(StringLit { value })
     }

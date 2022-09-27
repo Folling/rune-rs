@@ -119,14 +119,18 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    fn peek(&mut self) -> Option<Token<'a>> {
+    pub fn peek(&mut self) -> Option<Token<'a>> {
         let idx = self.idx;
+        let token_idx = self.token_idx;
         let live_pos = self.live_pos;
+        let last_pos = self.last_token_pos;
 
         let ret = self.next();
 
         self.idx = idx;
+        self.token_idx = token_idx;
         self.live_pos = live_pos;
+        self.last_token_pos = last_pos;
 
         ret
     }

@@ -41,10 +41,12 @@ impl<'a> Expr<'a> {
     {
         match lexer.cur_next() {
             None => return Err(ParseError::PrematureEOF),
-            Some(Token::Special("'")) => Ok(Expr::CharLiteral(CharLit::parse(lexer)?)),
-            Some(Token::Special("\"")) => Ok(Expr::StringLiteral(StringLit::parse(lexer)?)),
-            Some(Token::Textual(v)) if matches!(v.chars().next(), Some('0'..'9')) => Ok(Expr::NumericLiteral(NumericLit::parse(lexer)?)),
-            Some(Token::Special("[")) => Ok(Expr::TupleLiteral(TupleLit::parse(lexer)?)),
+            Some(Token::Special { value: "'", .. }) => Ok(Expr::CharLiteral(CharLit::parse(lexer)?)),
+            Some(Token::Special { value: "\"", .. }) => Ok(Expr::StringLiteral(StringLit::parse(lexer)?)),
+            Some(Token::Textual { value, idx }) if matches!(value.chars().next(), Some('0'..'9')) => {
+                Ok(Expr::NumericLiteral(NumericLit::parse(lexer, value, idx)?))
+            }
+            Some(Token::Special { value: "[", .. }) => Ok(Expr::TupleLiteral(TupleLit::parse(lexer)?)),
             Some(v) => todo!(),
         }
     }

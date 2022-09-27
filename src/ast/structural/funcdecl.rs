@@ -2,8 +2,7 @@ use crate::ast::evaluative::Block;
 use crate::ast::structural::FuncArg;
 use crate::ast::typical::Type;
 use crate::ast::{Ident, Node};
-use crate::transpiler::ParseError::InvalidToken;
-use crate::transpiler::{util, ParseError};
+use crate::transpiler::{util, ExpectedToken, ParseError};
 use crate::{Lexer, Token};
 use std::error::Error;
 
@@ -55,32 +54,36 @@ impl<'a> FuncProto<'a> {
     {
         let ident = Ident::parse(lexer)?;
 
-        util::exp_cur_next_tok(lexer, Token::Special("("))?;
+        util::exp_cur_next_sp_tok(lexer, "(")?;
 
         let mut args = vec![];
 
         loop {
             match lexer.cur() {
                 None => return Err(ParseError::PrematureEOF),
-                Some(Token::Special(",")) => {
+                Some(Token::Special { value: ",", .. }) => {
                     lexer.next_cur();
                     continue;
                 }
-                Some(Token::Special(")")) => {
+                Some(Token::Special { value: ")", .. }) => {
                     lexer.next_cur();
                     break;
                 }
-                Some(Token::Textual(_)) => args.push(FuncArg::parse(lexer)?),
+                Some(Token::Textual) => args.push(FuncArg::parse(lexer)?),
                 Some(v) => {
                     return Err(ParseError::InvalidToken {
                         got: v,
-                        expected: vec![Token::Special(","), Token::Special(")"), Token::Textual("any text")],
+                        expected: vec![
+                            ExpectedToken::Special { regex: "," },
+                            ExpectedToken::Special { regex: ")" },
+                            ExpectedToken::Textual { regex: "any text" },
+                        ],
                     })
                 }
             }
         }
 
-        util::exp_cur_next_tok(lexer, Token::Special("->"))?;
+        util::exp_cur_next_sp_tok(lexer, "->")?;
 
         let ret = Type::parse(lexer)?;
 

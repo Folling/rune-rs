@@ -41,11 +41,4 @@ impl<'a> Node<'a> for TraitFunction<'a> {
             TraitFunction::Specified(v) => v.valid(),
         }
     }
-
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
-    where
-        Self: Sized,
-    {
-        todo!()
-    }
 }

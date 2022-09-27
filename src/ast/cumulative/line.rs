@@ -32,15 +32,15 @@ impl<'a> Line<'a> {
     {
         match lexer.cur_next() {
             None => return Err(ParseError::PrematureEOF),
-            Some(Token::Textual("return")) => match lexer.cur() {
+            Some(Token::Textual { value: "return", .. }) => match lexer.cur() {
                 None => return Err(ParseError::PrematureEOF),
-                Some(Token::Special(";")) => {
+                Some(Token::Special { value: ";", .. }) => {
                     lexer.next_cur();
                     Ok(Line::Return(None))
                 }
                 _ => Ok(Line::Return(Some(Expr::parse(lexer)?))),
             },
-            Some(Token::Textual("var")) => Ok(Line::VarDecl(VarDecl::parse(lexer)?)),
+            Some(Token::Textual { value: "var", .. }) => Ok(Line::VarDecl(VarDecl::parse(lexer)?)),
             Some(v) => Ok(Line::Expr(Expr::parse(lexer)?)),
         }
     }

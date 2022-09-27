@@ -85,7 +85,7 @@
 //
 //         match lexer.cur_next() {
 //             None => return Err(ParseError::PrematureEOF),
-//             Some(Token::Special("'")) => {
+//             Some(Token::Special{value: "'", ..}) => {
 //                 let ret = match lexer.cur_next() {
 //                     None => return Err(ParseError::PrematureEOF),
 //                     Some(Token::Textual(v)) if v.len() == 1 => Literal::Char {
@@ -94,40 +94,40 @@
 //                     Some(v) => {
 //                         return Err(ParseError::InvalidToken {
 //                             got: v,
-//                             expected: vec![Token::Textual("single char")],
+//                             expected: vec![Token::Textual{value: "single char", ..}],
 //                         })
 //                     }
 //                 };
 //
-//                 util::exp_cur_next_tok(lexer, Token::Special("'"))?;
+//                 util::exp_cur_next_tok(lexer, Token::Special{value: "'", ..})?;
 //
 //                 Ok(ret)
 //             }
-//             Some(Token::Special("\"")) => {
+//             Some(Token::Special{value: "\"", ..}) => {
 //                 let ret = match lexer.cur_next() {
 //                     None => return Err(ParseError::PrematureEOF),
 //                     Some(Token::Textual(v)) => Literal::String { value: v },
 //                     Some(v) => {
 //                         return Err(ParseError::InvalidToken {
 //                             got: v,
-//                             expected: vec![Token::Textual("any text")],
+//                             expected: vec![Token::Textual{value: "any text", ..}],
 //                         })
 //                     }
 //                 };
 //
-//                 util::exp_cur_next_tok(lexer, Token::Special("\""))?;
+//                 util::exp_cur_next_tok(lexer, Token::Special{value: "\"", ..})?;
 //
 //                 Ok(ret)
 //             }
-//             Some(Token::Special("[")) => {
+//             Some(Token::Special{value: "[", ..}) => {
 //                 let ret = match lexer.cur() {
 //                     None => Err(ParseError::PrematureEOF),
-//                     Some(Token::Special("..")) => {
+//                     Some(Token::Special{value: "..", ..}) => {
 //                         lexer.next_cur();
 //
 //                         let ret = match lexer.cur() {
 //                             None => Err(ParseError::PrematureEOF),
-//                             Some(Token::Special("<")) => {
+//                             Some(Token::Special{value: "<", ..}) => {
 //                                 lexer.next_cur();
 //                                 Ok(Literal::Range {
 //                                     from_to: NotNeither::Right(Box::new(Expr::parse(lexer)?)),
@@ -140,7 +140,7 @@
 //                             }),
 //                         };
 //
-//                         util::exp_cur_next_tok(lexer, Token::Special("]"))?;
+//                         util::exp_cur_next_tok(lexer, Token::Special{value: "]", ..})?;
 //
 //                         ret
 //                     }
@@ -149,7 +149,7 @@
 //
 //                         match lexer.cur_next() {
 //                             None => Err(ParseError::PrematureEOF),
-//                             Some(Token::Special(",")) => {
+//                             Some(Token::Special{value: ",", ..}) => {
 //                                 let mut items = vec![expr];
 //
 //                                 loop {
@@ -157,12 +157,12 @@
 //
 //                                     match lexer.cur_next() {
 //                                         None => return Err(ParseError::PrematureEOF),
-//                                         Some(Token::Special(",")) => continue,
-//                                         Some(Token::Special("]")) => break,
+//                                         Some(Token::Special{value: ",", ..}) => continue,
+//                                         Some(Token::Special{value: "]", ..}) => break,
 //                                         Some(v) => {
 //                                             return Err(ParseError::InvalidToken {
 //                                                 got: v,
-//                                                 expected: vec![Token::Special(","), Token::Special("]")],
+//                                                 expected: vec![Token::Special(","), Token::Special{value: "]", ..}],
 //                                             })
 //                                         }
 //                                     }
@@ -170,15 +170,15 @@
 //
 //                                 Ok(Literal::Array { items })
 //                             }
-//                             Some(Token::Special(">")) => {
-//                                 util::exp_cur_next_tok(lexer, Token::Special(".."))?;
+//                             Some(Token::Special{value: ">", ..}) => {
+//                                 util::exp_cur_next_tok(lexer, Token::Special{value: "..", ..})?;
 //
 //                                 Literal::parse_range_upper(lexer, expr, true)
 //                             }
-//                             Some(Token::Special("..")) => Literal::parse_range_upper(lexer, expr, false),
+//                             Some(Token::Special{value: "..", ..}) => Literal::parse_range_upper(lexer, expr, false),
 //                             Some(v) => Err(ParseError::InvalidToken {
 //                                 got: v,
-//                                 expected: vec![Token::Special(","), Token::Special("..")],
+//                                 expected: vec![Token::Special(","), Token::Special{value: "..", ..}],
 //                             }),
 //                         }
 //                     }
@@ -186,13 +186,13 @@
 //
 //                 ret
 //             }
-//             Some(Token::Special("|")) => {
+//             Some(Token::Special{value: "|", ..}) => {
 //                 todo!("lambdas aren't implemented yet")
 //             }
 //             Some(Token::Textual(v)) if matches!(v.chars().next(), Some(c) if c.is_ascii_digit()) => {
 //                 return match lexer.cur() {
 //                     None => Err(ParseError::PrematureEOF),
-//                     Some(Token::Special(".")) => {
+//                     Some(Token::Special{value: ".", ..}) => {
 //                         lexer.next_cur();
 //
 //                         match lexer.cur_next() {
@@ -200,17 +200,17 @@
 //                             Some(Token::Textual(_)) => {
 //                                 let str = unsafe { lexer.get_from_to_unchecked(start_idx, lexer.token_idx()) };
 //
-//                                 util::exp_cur_next_tok(lexer, Token::Special("_"))?;
+//                                 util::exp_cur_next_tok(lexer, Token::Special{value: "_", ..})?;
 //
 //                                 match lexer.cur_next() {
 //                                     None => Err(ParseError::PrematureEOF),
-//                                     Some(Token::Textual("f32")) => Ok(Literal::Floating {
+//                                     Some(Token::Textual{value: "f32", ..}) => Ok(Literal::Floating {
 //                                         value: FloatingLiteral::F32(str.parse::<f32>().map_err(|_| ParseError::InvalidLiteral {
 //                                             got: str,
 //                                             expected: "valid 32 bit float",
 //                                         })?),
 //                                     }),
-//                                     Some(Token::Textual("f64")) => Ok(Literal::Floating {
+//                                     Some(Token::Textual{value: "f64", ..}) => Ok(Literal::Floating {
 //                                         value: FloatingLiteral::F64(str.parse::<f64>().map_err(|_| ParseError::InvalidLiteral {
 //                                             got: str,
 //                                             expected: "valid 64 bit float",
@@ -218,13 +218,13 @@
 //                                     }),
 //                                     Some(v) => Err(ParseError::InvalidToken {
 //                                         got: v,
-//                                         expected: vec![Token::Textual("f32"), Token::Textual("f64")],
+//                                         expected: vec![Token::Textual("f32"), Token::Textual{value: "f64", ..}],
 //                                     }),
 //                                 }
 //                             }
 //                             Some(v) => Err(ParseError::InvalidToken {
 //                                 got: v,
-//                                 expected: vec![Token::Textual("a valid fraction")],
+//                                 expected: vec![Token::Textual{value: "a valid fraction", ..}],
 //                             }),
 //                         }
 //                     }
@@ -258,53 +258,53 @@
 //
 //                         let str = &v[offset..];
 //
-//                         util::exp_cur_next_tok(lexer, Token::Special("_"))?;
+//                         util::exp_cur_next_tok(lexer, Token::Special{value: "_", ..})?;
 //
 //                         match lexer.cur_next() {
 //                             None => Err(ParseError::PrematureEOF),
-//                             Some(Token::Textual("i8")) => Ok(Literal::Integer {
+//                             Some(Token::Textual{value: "i8", ..}) => Ok(Literal::Integer {
 //                                 value: IntegerLiteral::I8(i8::from_str_radix(str, base).map_err(|e| ParseError::InvalidLiteral {
 //                                     got: v,
 //                                     expected: "-128 to 127",
 //                                 })?),
 //                             }),
-//                             Some(Token::Textual("i16")) => Ok(Literal::Integer {
+//                             Some(Token::Textual{value: "i16", ..}) => Ok(Literal::Integer {
 //                                 value: IntegerLiteral::I16(i16::from_str_radix(str, base).map_err(|e| ParseError::InvalidLiteral {
 //                                     got: v,
 //                                     expected: "-32'768 to 32'767",
 //                                 })?),
 //                             }),
-//                             Some(Token::Textual("i32")) => Ok(Literal::Integer {
+//                             Some(Token::Textual{value: "i32", ..}) => Ok(Literal::Integer {
 //                                 value: IntegerLiteral::I32(i32::from_str_radix(str, base).map_err(|e| ParseError::InvalidLiteral {
 //                                     got: v,
 //                                     expected: "-2147483648 to 2147483647",
 //                                 })?),
 //                             }),
-//                             Some(Token::Textual("i64")) => Ok(Literal::Integer {
+//                             Some(Token::Textual{value: "i64", ..}) => Ok(Literal::Integer {
 //                                 value: IntegerLiteral::I64(i64::from_str_radix(str, base).map_err(|e| ParseError::InvalidLiteral {
 //                                     got: v,
 //                                     expected: "-9223372036854775808 to 9223372036854775807",
 //                                 })?),
 //                             }),
-//                             Some(Token::Textual("u8")) => Ok(Literal::Integer {
+//                             Some(Token::Textual{value: "u8", ..}) => Ok(Literal::Integer {
 //                                 value: IntegerLiteral::U8(u8::from_str_radix(str, base).map_err(|e| ParseError::InvalidLiteral {
 //                                     got: v,
 //                                     expected: "0 to 255",
 //                                 })?),
 //                             }),
-//                             Some(Token::Textual("u16")) => Ok(Literal::Integer {
+//                             Some(Token::Textual{value: "u16", ..}) => Ok(Literal::Integer {
 //                                 value: IntegerLiteral::U16(u16::from_str_radix(str, base).map_err(|e| ParseError::InvalidLiteral {
 //                                     got: v,
 //                                     expected: "0 to 65535",
 //                                 })?),
 //                             }),
-//                             Some(Token::Textual("u32")) => Ok(Literal::Integer {
+//                             Some(Token::Textual{value: "u32", ..}) => Ok(Literal::Integer {
 //                                 value: IntegerLiteral::U32(u32::from_str_radix(str, base).map_err(|e| ParseError::InvalidLiteral {
 //                                     got: v,
 //                                     expected: "0 to 4294967295",
 //                                 })?),
 //                             }),
-//                             Some(Token::Textual("u64")) => Ok(Literal::Integer {
+//                             Some(Token::Textual{value: "u64", ..}) => Ok(Literal::Integer {
 //                                 value: IntegerLiteral::U64(u64::from_str_radix(str, base).map_err(|e| ParseError::InvalidLiteral {
 //                                     got: v,
 //                                     expected: "0 to 18446744073709551615",
@@ -313,14 +313,14 @@
 //                             Some(v) => Err(ParseError::InvalidToken {
 //                                 got: v,
 //                                 expected: vec![
-//                                     Token::Textual("i8"),
-//                                     Token::Textual("i16"),
-//                                     Token::Textual("i32"),
-//                                     Token::Textual("i64"),
-//                                     Token::Textual("u8"),
-//                                     Token::Textual("u16"),
-//                                     Token::Textual("u32"),
-//                                     Token::Textual("u64"),
+//                                     Token::Textual{value: "i8", ..},
+//                                     Token::Textual{value: "i16", ..},
+//                                     Token::Textual{value: "i32", ..},
+//                                     Token::Textual{value: "i64", ..},
+//                                     Token::Textual{value: "u8", ..},
+//                                     Token::Textual{value: "u16", ..},
+//                                     Token::Textual{value: "u32", ..},
+//                                     Token::Textual{value: "u64", ..},
 //                                 ],
 //                             }),
 //                         }
@@ -331,11 +331,11 @@
 //                 return Err(ParseError::InvalidToken {
 //                     got: v,
 //                     expected: vec![
-//                         Token::Special("\""),
-//                         Token::Special("'"),
-//                         Token::Textual("0-9"),
-//                         Token::Special("["),
-//                         Token::Special("|"),
+//                         Token::Special{value: "\"", ..},
+//                         Token::Special{value: "'", ..},
+//                         Token::Textual{value: "0-9", ..},
+//                         Token::Special{value: "[", ..},
+//                         Token::Special{value: "|", ..},
 //                     ],
 //                 })
 //             }
@@ -347,7 +347,7 @@
 //     pub fn parse_range_upper(lexer: &mut Lexer<'a>, from: Box<Expr<'a>>, lower_open: bool) -> Result<Literal<'a>, ParseError<'a>> {
 //         let ret = match lexer.cur() {
 //             None => return Err(ParseError::PrematureEOF),
-//             Some(Token::Special("<")) => {
+//             Some(Token::Special{value: "<", ..}) => {
 //                 lexer.next_cur();
 //
 //                 let to = Box::new(Expr::parse(lexer)?);
@@ -360,7 +360,7 @@
 //                     },
 //                 });
 //             }
-//             Some(Token::Special("]")) => {
+//             Some(Token::Special{value: "]", ..}) => {
 //                 return Ok(Literal::Range {
 //                     from_to: NotNeither::Left(from),
 //                     openness: if lower_open {
@@ -384,7 +384,7 @@
 //             }
 //         };
 //
-//         util::exp_cur_next_tok(lexer, Token::Special("]"))?;
+//         util::exp_cur_next_tok(lexer, Token::Special{value: "]", ..})?;
 //
 //         ret
 //     }

@@ -1,6 +1,6 @@
 use crate::ast::Node;
 use crate::transpiler::ParseError::InvalidLiteral;
-use crate::transpiler::{util, ParseError};
+use crate::transpiler::{util, ExpectedToken, ParseError};
 use crate::{Lexer, Token};
 use std::num::ParseIntError;
 
@@ -44,16 +44,18 @@ impl<'a> CharLit<'a> {
     {
         let value = match lexer.cur_next() {
             None => return Err(ParseError::PrematureEOF),
-            Some(Token::Textual(str)) => str,
+            Some(Token::Textual { value: str, .. }) => str,
             Some(v) => {
                 return Err(ParseError::InvalidToken {
                     got: v,
-                    expected: vec![Token::Textual("any valid char")],
+                    expected: vec![ExpectedToken::Textual {
+                        regex: "([\\p{L}\\p{M}|\\\\u([0x0-0xD77]|[0xE000-0x10FFFF])",
+                    }],
                 })
             }
         };
 
-        util::exp_cur_next_tok(lexer, Token::Textual("'"))?;
+        util::exp_cur_next_sp_tok(lexer, "'")?;
 
         Ok(CharLit { value })
     }

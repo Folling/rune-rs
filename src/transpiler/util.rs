@@ -1,35 +1,32 @@
-use crate::transpiler::ParseError;
+use crate::transpiler::{ExpectedToken, ParseError};
 use crate::{Lexer, Token};
 
-pub fn exp_cur_next_tok<'a>(lexer: &mut Lexer<'a>, token: Token<'static>) -> Result<(), ParseError<'a>> {
-    match lexer.cur_next() {
+fn expr_sp_token<'a>(token: Option<Token<'a>>, exp: &'static str) -> Result<(), ParseError<'a>> {
+    match token {
         None => Err(ParseError::PrematureEOF),
-        Some(v) if v == token => Ok(()),
+        Some(Token::Special { value, .. }) if value == exp => Ok(()),
         Some(v) => Err(ParseError::InvalidToken {
             got: v,
-            expected: vec![token],
+            expected: vec![ExpectedToken::Special { regex: exp }],
         }),
     }
 }
 
-pub fn exp_next_cur_tok<'a>(lexer: &mut Lexer<'a>, token: Token<'static>) -> Result<(), ParseError<'a>> {
-    match lexer.next_cur() {
-        None => Err(ParseError::PrematureEOF),
-        Some(v) if v == token => Ok(()),
-        Some(v) => Err(ParseError::InvalidToken {
-            got: v,
-            expected: vec![token],
-        }),
-    }
+pub fn exp_cur_next_sp_tok<'a>(lexer: &mut Lexer<'a>, exp: &'static str) -> Result<(), ParseError<'a>> {
+    expr_sp_token(lexer.cur_next(), exp)
 }
 
-pub fn exp_next_cur_toks<'a>(lexer: &mut Lexer<'a>, tokens: &[Token<'static>]) -> Result<(), ParseError<'a>> {
+pub fn exp_next_cur_sp_tok<'a>(lexer: &mut Lexer<'a>, exp: &'static str) -> Result<(), ParseError<'a>> {
+    expr_sp_token(lexer.next_cur(), exp)
+}
+
+pub fn exp_next_cur_sp_toks<'a>(lexer: &mut Lexer<'a>, exp: &[&'static str]) -> Result<(), ParseError<'a>> {
     match lexer.next_cur() {
         None => Err(ParseError::PrematureEOF),
-        Some(v) if tokens.contains(&v) => Ok(()),
+        Some(Token::Special { value, .. }) if exp.contains(&value) => Ok(()),
         Some(v) => Err(ParseError::InvalidToken {
             got: v,
-            expected: tokens.to_vec(),
+            expected: tokens.iter().map(|v| ExpectedToken::Special { regex: v }).collect::<Vec<_>>(),
         }),
     }
 }

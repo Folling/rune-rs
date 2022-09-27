@@ -1,7 +1,7 @@
 use crate::ast::evaluative::Expr;
 use crate::ast::typical::Type;
 use crate::ast::{Ident, Node};
-use crate::transpiler::{util, ParseError};
+use crate::transpiler::{util, ExpectedToken, ParseError};
 use crate::{Lexer, Token};
 
 #[derive(Debug)]
@@ -30,7 +30,7 @@ impl<'a> VarDecl<'a> {
 
         let r#type = match lexer.cur() {
             None => return Err(ParseError::PrematureEOF),
-            Some(Token::Special(":")) => {
+            Some(Token::Special { value: ":", .. }) => {
                 lexer.next_cur();
                 Some(Type::parse(lexer)?)
             }
@@ -39,15 +39,15 @@ impl<'a> VarDecl<'a> {
 
         let assignment = match lexer.cur() {
             None => return Err(ParseError::PrematureEOF),
-            Some(Token::Special(";")) => None,
-            Some(Token::Special("=")) => {
+            Some(Token::Special { value: ";", .. }) => None,
+            Some(Token::Special { value: "=", .. }) => {
                 lexer.next_cur();
                 Some(Expr::parse(lexer)?)
             }
             Some(v) => {
                 return Err(ParseError::InvalidToken {
                     got: v,
-                    expected: vec![Token::Special(";"), Token::Special("=")],
+                    expected: vec![ExpectedToken::Special { regex: ";" }, ExpectedToken::Special { regex: "=" }],
                 })
             }
         };

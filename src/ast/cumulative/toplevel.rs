@@ -1,7 +1,7 @@
 use crate::ast::evaluative::Block;
 use crate::ast::structural::*;
 use crate::ast::{Ident, Node};
-use crate::transpiler::ParseError;
+use crate::transpiler::{ExpectedToken, ParseError};
 use crate::{Lexer, Token};
 
 #[derive(Debug)]
@@ -34,19 +34,19 @@ impl<'a> TopLevelExpr<'a> {
     {
         match lexer.cur_next() {
             None => Err(ParseError::PrematureEOF),
-            Some(Token::Textual("fn")) => Ok(TopLevelExpr::FuncDecl(FuncDecl::parse(lexer)?)),
-            Some(Token::Textual("struct")) => Ok(TopLevelExpr::StructDecl(StructDecl::parse(lexer)?)),
-            Some(Token::Textual("trait")) => Ok(TopLevelExpr::TraitDecl(TraitDecl::parse(lexer)?)),
-            Some(Token::Textual("impl")) => Ok(TopLevelExpr::StructImpl(StructImpl::parse(lexer)?)),
-            Some(Token::Textual("use")) => Ok(TopLevelExpr::UseDecl(UseDecl::parse(lexer)?)),
+            Some(Token::Textual { value: "fn", .. }) => Ok(TopLevelExpr::FuncDecl(FuncDecl::parse(lexer)?)),
+            Some(Token::Textual { value: "struct", .. }) => Ok(TopLevelExpr::StructDecl(StructDecl::parse(lexer)?)),
+            Some(Token::Textual { value: "trait", .. }) => Ok(TopLevelExpr::TraitDecl(TraitDecl::parse(lexer)?)),
+            Some(Token::Textual { value: "impl", .. }) => Ok(TopLevelExpr::StructImpl(StructImpl::parse(lexer)?)),
+            Some(Token::Textual { value: "use", .. }) => Ok(TopLevelExpr::UseDecl(UseDecl::parse(lexer)?)),
             Some(v) => Err(ParseError::InvalidToken {
                 got: v,
                 expected: vec![
-                    Token::Textual("fn"),
-                    Token::Textual("struct"),
-                    Token::Textual("trait"),
-                    Token::Textual("impl"),
-                    Token::Textual("use"),
+                    ExpectedToken::Textual { regex: "fn" },
+                    ExpectedToken::Textual { regex: "struct" },
+                    ExpectedToken::Textual { regex: "trait" },
+                    ExpectedToken::Textual { regex: "impl" },
+                    ExpectedToken::Textual { regex: "use" },
                 ],
             }),
         }

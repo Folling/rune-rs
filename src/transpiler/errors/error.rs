@@ -25,12 +25,17 @@ pub enum LiteralType {
     Lambda,
 }
 
+pub enum ExpectedToken {
+    Textual { regex: &'static str },
+    Special { regex: &'static str },
+}
+
 #[derive(Debug)]
 pub enum ParseError<'a> {
     PrematureEOF,
     InvalidToken {
         got: Token<'a>,
-        expected: Vec<Token<'a>>,
+        expected: Vec<ExpectedToken>,
     },
     InvalidLiteral {
         r#type: LiteralType,

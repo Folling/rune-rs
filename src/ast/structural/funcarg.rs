@@ -24,7 +24,7 @@ impl<'a> FuncArg<'a> {
     {
         let ident = Ident::parse(lexer)?;
 
-        util::exp_cur_next_tok(lexer, Token::Special(":"))?;
+        util::exp_cur_next_sp_tok(lexer, ":")?;
 
         let r#type = Type::parse(lexer)?;
 

@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use crate::ast::Node;
-use crate::transpiler::ParseError;
+use crate::transpiler::{ExpectedToken, ParseError};
 use crate::{Lexer, Token};
 
 #[derive(Debug)]
@@ -24,16 +24,16 @@ impl<'a> Ident<'a> {
         Self: Sized,
     {
         match lexer.cur_next() {
-            Some(Token::Special(v)) => Err(ParseError::InvalidToken {
-                got: Token::Special(v),
-                expected: vec![Token::Textual("any text")],
-            }),
+            None => Err(ParseError::PrematureEOF),
             // FIXME, this needs to be separate, r# will be parsed as [r, #]
-            Some(Token::Textual(v)) => Ok(Ident {
-                raw: v.starts_with("r#"),
+            Some(Token::Textual { value, .. }) => Ok(Ident {
+                raw: value.starts_with("r#"),
                 name: v,
             }),
-            None => Err(ParseError::PrematureEOF),
+            Some(v) => Err(ParseError::InvalidToken {
+                got: v,
+                expected: vec![ExpectedToken::Textual { regex: "any text" }],
+            }),
         }
     }
 }
