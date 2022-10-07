@@ -1,6 +1,6 @@
 use crate::ast::evaluative::Expr;
 use crate::ast::Node;
-use crate::transpiler::ParseError;
+use crate::transpiler::ParseErr;
 use crate::util::notneither::NotNeither;
 use crate::Lexer;
 
@@ -29,7 +29,7 @@ impl<'a> Node<'a> for RangeLit<'a> {
 }
 
 impl<'a> RangeLit<'a> {
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
     {

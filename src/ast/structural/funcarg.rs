@@ -1,6 +1,6 @@
 use crate::ast::typical::Type;
 use crate::ast::{Ident, Node};
-use crate::transpiler::{util, ParseError};
+use crate::transpiler::{util, ParseErr};
 use crate::{Lexer, Token};
 
 #[derive(Debug)]
@@ -18,7 +18,7 @@ impl<'a> Node<'a> for FuncArg<'a> {
 }
 
 impl<'a> FuncArg<'a> {
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
     {

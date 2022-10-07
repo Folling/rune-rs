@@ -1,5 +1,5 @@
 use crate::ast::{Line, Node};
-use crate::transpiler::{util, ParseError};
+use crate::transpiler::{util, ParseErr};
 use crate::{Lexer, Token};
 
 #[derive(Debug)]
@@ -16,7 +16,7 @@ impl<'a> Node<'a> for Block<'a> {
 }
 
 impl<'a> Block<'a> {
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
     {
@@ -26,16 +26,12 @@ impl<'a> Block<'a> {
 
         loop {
             match lexer.cur() {
-                None => return Err(ParseError::PrematureEOF),
-                Some(Token::Special { value: ";", .. }) => {
-                    lexer.next_cur();
-                    continue;
-                }
-                Some(Token::Special { value: "}", .. }) => {
+                None => return Err(ParseErr::PrematureEOF),
+                Some((Token::Special("}"), _)) => {
                     lexer.next_cur();
                     break;
                 }
-                v => lines.push(Line::parse(lexer)?),
+                _ => lines.push(Line::parse(lexer)?),
             }
         }
 

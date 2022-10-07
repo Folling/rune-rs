@@ -1,7 +1,7 @@
 use crate::ast::evaluative::Expr;
 use crate::ast::typical::Type;
 use crate::ast::Node;
-use crate::transpiler::ParseError;
+use crate::transpiler::ParseErr;
 use crate::Lexer;
 
 #[derive(Debug)]
@@ -20,14 +20,14 @@ impl<'a> Node<'a> for Generic<'a> {
 
     fn valid(&self) -> bool {
         match self {
-            Generic::Type(v) => v.valid(),
-            Generic::Expression(v) => v.valid(),
+            Generic::Type(val) => val.valid(),
+            Generic::Expression(val) => val.valid(),
         }
     }
 }
 
 impl<'a> Generic<'a> {
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
     {
@@ -43,8 +43,8 @@ impl<'a> Node<'a> for GenericType<'a> {
     }
 }
 
-impl<'a> GenericType {
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> GenericType<'a> {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
     {

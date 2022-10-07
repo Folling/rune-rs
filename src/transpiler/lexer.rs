@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::transpiler::ParseError;
+use crate::transpiler::{ParseErr, TokenLoc};
 use crate::Token;
 
 pub struct Lexer<'a> {
@@ -48,7 +48,7 @@ impl<'a> Lexer<'a> {
                                 ((count.saturating_sub(3)) * 6, 0b111111),
                                 (0, 0b111111),
                             ])
-                            .fold(0, |acc, (v, (s, b))| acc | (((*v & b) as u32) << s)),
+                            .fold(0, |acc, (val, (s, b))| acc | (((*val & b) as u32) << s)),
                     )
                 };
 
@@ -82,7 +82,7 @@ impl<'a> Lexer<'a> {
         false
     }
 
-    fn next(&mut self) -> Option<Token<'a>> {
+    fn next(&mut self) -> Option<(Token<'a>, TokenLoc)> {
         self.last_token_pos = self.live_pos;
 
         while self.predicate(char::is_whitespace) {}
@@ -97,10 +97,10 @@ impl<'a> Lexer<'a> {
             if next.is_alphanumeric() {
                 while self.predicate(char::is_alphanumeric) {}
 
-                Some(Token::Textual {
-                    value: unsafe { self.content.get_unchecked(start..self.idx) },
-                    loc: (self.token_idx, self.idx),
-                })
+                Some((
+                    Token::Textual(unsafe { self.content.get_unchecked(start..self.idx) }),
+                    TokenLoc(self.token_idx, self.idx),
+                ))
             } else {
                 match self.peek_char() {
                     Some(c)
@@ -115,10 +115,10 @@ impl<'a> Lexer<'a> {
                     _ => {}
                 }
 
-                Some(Token::Special {
-                    value: unsafe { self.content.get_unchecked(start..self.idx) },
-                    loc: (self.token_idx, self.idx),
-                })
+                Some((
+                    Token::Special(unsafe { self.content.get_unchecked(start..self.idx) }),
+                    TokenLoc(self.token_idx, self.idx),
+                ))
             }
         } else {
             None
@@ -138,19 +138,19 @@ impl<'a> Lexer<'a> {
         self.live_pos = live_pos;
         self.last_token_pos = last_pos;
 
-        ret
+        ret.0
     }
 
-    pub fn cur_next(&mut self) -> Option<Token<'a>> {
+    pub fn cur_next(&mut self) -> Option<(Token<'a>, TokenLoc)> {
         let ret = self.current_token;
 
-        self.current_token = self.next();
+        self.current_token = self.next().0;
 
-        ret
+        ret.map(|val| (val, TokenLoc(self.token_idx, self.idx)))
     }
 
     pub fn next_cur(&mut self) -> Option<Token<'a>> {
-        self.current_token = self.next();
+        self.current_token = self.next().0;
 
         self.current_token
     }
@@ -159,8 +159,8 @@ impl<'a> Lexer<'a> {
         self.current_token
     }
 
-    pub unsafe fn get_from_to_unchecked(&self, from: usize, to: usize) -> &'a str {
-        self.content.get_unchecked(from..to)
+    pub unsafe fn get_from_to(&self, from: TokenLoc, to: TokenLoc) -> &'a str {
+        unsafe { self.content.get_unchecked(from.0..to.1) }
     }
 
     pub fn token_idx(&self) -> usize {

@@ -2,7 +2,7 @@ use crate::ast::evaluative::Block;
 use crate::ast::structural::FuncArg;
 use crate::ast::typical::Type;
 use crate::ast::{Ident, Node};
-use crate::transpiler::{util, ExpectedToken, ParseError};
+use crate::transpiler::{util, ExpectedToken, ParseErr};
 use crate::{Lexer, Token};
 use std::error::Error;
 
@@ -28,7 +28,7 @@ impl<'a> Node<'a> for FuncDecl<'a> {
 }
 
 impl<'a> FuncDecl<'a> {
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
     {
@@ -48,7 +48,7 @@ impl<'a> Node<'a> for FuncProto<'a> {
 }
 
 impl<'a> FuncProto<'a> {
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
     {
@@ -60,19 +60,19 @@ impl<'a> FuncProto<'a> {
 
         loop {
             match lexer.cur() {
-                None => return Err(ParseError::PrematureEOF),
-                Some(Token::Special { value: ",", .. }) => {
+                None => return Err(ParseErr::PrematureEOF),
+                Some((Token::Special(","), _)) => {
                     lexer.next_cur();
                     continue;
                 }
-                Some(Token::Special { value: ")", .. }) => {
+                Some((Token::Special(")"), _)) => {
                     lexer.next_cur();
                     break;
                 }
-                Some(Token::Textual) => args.push(FuncArg::parse(lexer)?),
-                Some(v) => {
-                    return Err(ParseError::InvalidToken {
-                        got: v,
+                Some((Token::Textual(_), _)) => args.push(FuncArg::parse(lexer)?),
+                Some(val) => {
+                    return Err(ParseErr::InvalidToken {
+                        got: val,
                         expected: vec![
                             ExpectedToken::Special { regex: "," },
                             ExpectedToken::Special { regex: ")" },

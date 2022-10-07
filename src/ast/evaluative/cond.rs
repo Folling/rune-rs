@@ -1,11 +1,11 @@
 use crate::ast::evaluative::{Block, Expr};
 use crate::ast::Node;
-use crate::transpiler::ParseError;
+use crate::transpiler::ParseErr;
 use crate::Lexer;
 
 #[derive(Debug)]
 pub struct CondBlock<'a> {
-    cond: Expr<'a>,
+    cond: Box<Expr<'a>>,
     block: Block<'a>,
 }
 
@@ -25,7 +25,7 @@ impl<'a> Node<'a> for IfElseChain<'a> {
 }
 
 impl<'a> IfElseChain<'a> {
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
     {
@@ -42,7 +42,7 @@ impl<'a> Node<'a> for CondBlock<'a> {
 }
 
 impl<'a> CondBlock<'a> {
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
     {

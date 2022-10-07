@@ -1,8 +1,6 @@
 use crate::ast::Node;
-use crate::transpiler::ParseError::InvalidLiteral;
-use crate::transpiler::{util, ExpectedToken, ParseError};
+use crate::transpiler::{util, ExpectedToken, ParseErr};
 use crate::{Lexer, Token};
-use std::num::ParseIntError;
 
 #[derive(Debug)]
 pub struct CharLit<'a> {
@@ -27,9 +25,7 @@ impl<'a> Node<'a> for CharLit<'a> {
 
                 let str = &self.value[chars.offset()..];
 
-                if u32::from_str_radix(str, 16).ok().and_then(char::from_u32).is_none() {
-                    return false;
-                }
+                u32::from_str_radix(str, 16).ok().and_then(char::from_u32).is_some()
             }
             (Some((_, '\\')), Some(_)) => true,
             _ => false,
@@ -38,16 +34,16 @@ impl<'a> Node<'a> for CharLit<'a> {
 }
 
 impl<'a> CharLit<'a> {
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
     {
         let value = match lexer.cur_next() {
-            None => return Err(ParseError::PrematureEOF),
-            Some(Token::Textual { value: str, .. }) => str,
-            Some(v) => {
-                return Err(ParseError::InvalidToken {
-                    got: v,
+            None => return Err(ParseErr::PrematureEOF),
+            Some((Token::Textual(val), _)) => val,
+            Some((val, _)) => {
+                return Err(ParseErr::InvalidToken {
+                    got: val,
                     expected: vec![ExpectedToken::Textual {
                         regex: "([\\p{L}\\p{M}|\\\\u([0x0-0xD77]|[0xE000-0x10FFFF])",
                     }],

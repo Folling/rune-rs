@@ -4,6 +4,7 @@ pub mod expr;
 pub mod funccall;
 pub mod literals;
 pub mod ops;
+pub mod trial;
 
 pub use crate::ast::structural::vardecl::*;
 pub use block::*;
@@ -12,3 +13,4 @@ pub use expr::*;
 pub use funccall::*;
 pub use literals::*;
 pub use ops::*;
+pub use trial::*;

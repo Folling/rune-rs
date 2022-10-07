@@ -1,6 +1,6 @@
 pub use crate::ast::Ast;
 use crate::ast::{Node, TopLevelExpr};
-pub use crate::transpiler::errors::{ParseError, ParseErrorInfo};
+pub use crate::transpiler::errors::{ParseErr, ParseErrorInfo};
 pub use crate::transpiler::Lexer;
 
 pub struct Parser<'a> {
@@ -21,7 +21,7 @@ impl<'a> Parser<'a> {
 
         while self.lexer.cur().is_some() {
             ast.root_nodes.push(match TopLevelExpr::parse(&mut self.lexer) {
-                Ok(v) => v,
+                Ok(val) => val,
                 Err(err) => {
                     return Err(ParseErrorInfo {
                         line: self.lexer.pos().1,

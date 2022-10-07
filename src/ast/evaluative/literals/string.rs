@@ -1,5 +1,5 @@
 use crate::ast::Node;
-use crate::transpiler::{util, ExpectedToken, ParseError};
+use crate::transpiler::{util, ExpectedToken, ParseErr};
 use crate::{Lexer, Token};
 
 #[derive(Debug)]
@@ -18,16 +18,16 @@ impl<'a> Node<'a> for StringLit<'a> {
 }
 
 impl<'a> StringLit<'a> {
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
     {
         let value = match lexer.cur_next() {
-            None => return Err(ParseError::PrematureEOF),
-            Some(Token::Textual { value: str, .. }) => str,
-            Some(v) => {
-                return Err(ParseError::InvalidToken {
-                    got: v,
+            None => return Err(ParseErr::PrematureEOF),
+            Some((Token::Textual(val), _)) => val,
+            Some((val, _)) => {
+                return Err(ParseErr::InvalidToken {
+                    got: val,
                     expected: vec![ExpectedToken::Textual { regex: "any valid text" }],
                 })
             }

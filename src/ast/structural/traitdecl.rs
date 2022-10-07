@@ -1,6 +1,6 @@
 use crate::ast::structural::{FuncDecl, FuncProto};
 use crate::ast::{Ident, Node};
-use crate::transpiler::ParseError;
+use crate::transpiler::ParseErr;
 use crate::Lexer;
 
 #[derive(Debug)]
@@ -24,7 +24,7 @@ impl<'a> Node<'a> for TraitDecl<'a> {
 }
 
 impl<'a> TraitDecl<'a> {
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
     {
@@ -37,8 +37,8 @@ impl<'a> Node<'a> for TraitFunction<'a> {
 
     fn valid(&self) -> bool {
         match self {
-            TraitFunction::Unspecified(v) => v.valid(),
-            TraitFunction::Specified(v) => v.valid(),
+            TraitFunction::Unspecified(val) => val.valid(),
+            TraitFunction::Specified(val) => val.valid(),
         }
     }
 }

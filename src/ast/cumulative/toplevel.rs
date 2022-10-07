@@ -1,7 +1,6 @@
-use crate::ast::evaluative::Block;
 use crate::ast::structural::*;
-use crate::ast::{Ident, Node};
-use crate::transpiler::{ExpectedToken, ParseError};
+use crate::ast::Node;
+use crate::transpiler::{ExpectedToken, ParseErr};
 use crate::{Lexer, Token};
 
 #[derive(Debug)]
@@ -18,29 +17,29 @@ impl<'a> Node<'a> for TopLevelExpr<'a> {
 
     fn valid(&self) -> bool {
         match self {
-            TopLevelExpr::StructDecl(v) => v.valid(),
-            TopLevelExpr::StructImpl(v) => v.valid(),
-            TopLevelExpr::FuncDecl(v) => v.valid(),
-            TopLevelExpr::TraitDecl(v) => v.valid(),
-            TopLevelExpr::UseDecl(v) => v.valid(),
+            TopLevelExpr::StructDecl(val) => val.valid(),
+            TopLevelExpr::StructImpl(val) => val.valid(),
+            TopLevelExpr::FuncDecl(val) => val.valid(),
+            TopLevelExpr::TraitDecl(val) => val.valid(),
+            TopLevelExpr::UseDecl(val) => val.valid(),
         }
     }
 }
 
 impl<'a> TopLevelExpr<'a> {
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
     {
         match lexer.cur_next() {
-            None => Err(ParseError::PrematureEOF),
-            Some(Token::Textual { value: "fn", .. }) => Ok(TopLevelExpr::FuncDecl(FuncDecl::parse(lexer)?)),
-            Some(Token::Textual { value: "struct", .. }) => Ok(TopLevelExpr::StructDecl(StructDecl::parse(lexer)?)),
-            Some(Token::Textual { value: "trait", .. }) => Ok(TopLevelExpr::TraitDecl(TraitDecl::parse(lexer)?)),
-            Some(Token::Textual { value: "impl", .. }) => Ok(TopLevelExpr::StructImpl(StructImpl::parse(lexer)?)),
-            Some(Token::Textual { value: "use", .. }) => Ok(TopLevelExpr::UseDecl(UseDecl::parse(lexer)?)),
-            Some(v) => Err(ParseError::InvalidToken {
-                got: v,
+            None => Err(ParseErr::PrematureEOF),
+            Some((Token::Textual("fn"), _)) => Ok(TopLevelExpr::FuncDecl(FuncDecl::parse(lexer)?)),
+            Some((Token::Textual("struct"), _)) => Ok(TopLevelExpr::StructDecl(StructDecl::parse(lexer)?)),
+            Some((Token::Textual("trait"), _)) => Ok(TopLevelExpr::TraitDecl(TraitDecl::parse(lexer)?)),
+            Some((Token::Textual("impl"), _)) => Ok(TopLevelExpr::StructImpl(StructImpl::parse(lexer)?)),
+            Some((Token::Textual("use"), _)) => Ok(TopLevelExpr::UseDecl(UseDecl::parse(lexer)?)),
+            Some((val, _)) => Err(ParseErr::InvalidToken {
+                got: val,
                 expected: vec![
                     ExpectedToken::Textual { regex: "fn" },
                     ExpectedToken::Textual { regex: "struct" },

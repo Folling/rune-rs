@@ -1,14 +1,15 @@
 use crate::ast::Node;
-use crate::transpiler::{ExpectedToken, LiteralType, ParseError};
+use crate::transpiler::{ExpectedToken, LiteralType, ParseErr, TokenLoc};
 use crate::{Lexer, Token};
+use std::str::pattern::Pattern;
 
 #[derive(Debug)]
-pub struct NumericLit<'a> {
-    value: &'a str,
-    r#type: &'a str,
+pub struct NumLit<'a> {
+    pub value: &'a str,
+    pub r#type: &'a str,
 }
 
-impl<'a> Node<'a> for NumericLit {
+impl<'a> Node<'a> for NumLit<'a> {
     fn generate(&self, content: &mut String) {
         todo!()
     }
@@ -18,42 +19,54 @@ impl<'a> Node<'a> for NumericLit {
     }
 }
 
-impl<'a> NumericLit<'a> {
-    pub fn parse(lexer: &mut Lexer<'a>, from_value: &'a str, from_idx: usize) -> Result<Self, ParseError> {
-        let ret = match lexer.cur() {
-            None => return Err(ParseError::PrematureEOF),
-            Some(Token::Special { value: ".", .. }) => match lexer.peek() {
-                None => return Err(ParseError::PrematureEOF),
-                Some(Token::Textual { value, loc: idx }) if matches!(value.chars().next(), Some(c) if c.is_ascii_digit()) => {}
-                _ => {
-                    return Err(ParseError::InvalidLiteral {
+impl<'a> NumLit<'a> {
+    pub fn parse(lexer: &mut Lexer<'a>, from_value: &'a str, from_loc: TokenLoc) -> Result<Self, ParseErr<'a>> {
+        let ret = match lexer.cur_next() {
+            None => return Err(ParseErr::PrematureEOF),
+            Some((Token::Special("."), _)) => match lexer.cur_next() {
+                None => return Err(ParseErr::PrematureEOF),
+                Some((Token::Textual(val), loc)) if matches!(val.chars().next(), Some(c) if c.is_ascii_digit()) => {
+                    let value = unsafe { lexer.get_from_to(from_loc, loc) };
+
+                    match lexer.cur_next() {
+                        None => return Err(ParseErr::PrematureEOF),
+                        Some((Token::Special("_"), loc)) => {}
+                        Some(_) => {
+                            return Err(ParseErr::InvalidLiteral {
+                                r#type: LiteralType::Numeric,
+                                got: unsafe { lexer.get_from_to(from_loc, loc) },
+                                expected: "_",
+                            })
+                        }
+                    }
+                }
+                Some((_, loc)) => {
+                    return Err(ParseErr::InvalidLiteral {
                         r#type: LiteralType::Numeric,
-                        got: unsafe { lexer.get_from_to_unchecked(from_idx, idx) },
-                        expected: "\\d+(([ui](8|16|32|64))|(\\.\\d+))",
+                        got: unsafe { lexer.get_from_to(from_loc, loc) },
+                        expected: "\\d+",
                     })
                 }
             },
-            Some(Token::Special { value: "_", .. }) => {}
-            Some(Token::Textual { value: "i8", .. }) => {}
-            Some(Token::Textual { value: "i16", .. }) => {}
-            Some(Token::Textual { value: "i32", .. }) => {}
-            Some(Token::Textual { value: "i64", .. }) => {}
-            Some(Token::Textual { value: "u8", .. }) => {}
-            Some(Token::Textual { value: "u16", .. }) => {}
-            Some(Token::Textual { value: "u32", .. }) => {}
-            Some(Token::Textual { value: "u64", .. }) => {}
-            Some(v) => {
-                return Err(ParseError::InvalidToken {
-                    got: v,
-                    expected: vec![ExpectedToken::Textual {
-                        regex: "\\d+(([ui](8|16|32|64))|(\\.\\d+))",
-                    }],
+            Some((Token::Special("_"), _)) => {
+                return match lexer.cur_next() {
+                    None => Err(ParseErr::PrematureEOF),
+                    Some((Token::Textual("i8" | "i16" | "i32" | "i64" | "u8" | "u16" | "u32" | "u64"), _)) => Ok(Self {
+                        value: from_value,
+                        r#type: val,
+                    }),
+                    Some((val, _)) => Err(ParseErr::InvalidToken {
+                        got: val,
+                        expected: vec![ExpectedToken::Textual { regex: "[ui](8|16|32|64)" }],
+                    }),
+                }
+            }
+            Some((val, _)) => {
+                return Err(ParseErr::InvalidToken {
+                    got: val,
+                    expected: vec![ExpectedToken::Textual { regex: "[\\._]" }],
                 })
             }
         };
-
-        lexer.next_cur();
-
-        Ok(ret)
     }
 }

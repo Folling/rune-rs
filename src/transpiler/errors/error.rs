@@ -5,7 +5,7 @@ use std::fmt::{Display, Formatter};
 pub struct ParseErrorInfo<'a> {
     pub line: usize,
     pub column: usize,
-    pub err: ParseError<'a>,
+    pub err: ParseErr<'a>,
 }
 
 impl<'a> Display for ParseErrorInfo<'a> {
@@ -31,7 +31,7 @@ pub enum ExpectedToken {
 }
 
 #[derive(Debug)]
-pub enum ParseError<'a> {
+pub enum ParseErr<'a> {
     PrematureEOF,
     InvalidToken {
         got: Token<'a>,
@@ -44,10 +44,10 @@ pub enum ParseError<'a> {
     },
 }
 
-impl<'a> Display for ParseError<'a> {
+impl<'a> Display for ParseErr<'a> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self)
     }
 }
 
-impl<'a> std::error::Error for ParseError<'a> {}
+impl<'a> std::error::Error for ParseErr<'a> {}

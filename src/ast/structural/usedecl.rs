@@ -1,6 +1,6 @@
 use crate::ast::structural::FuncDecl;
 use crate::ast::{Ident, Node};
-use crate::transpiler::{ExpectedToken, ParseError};
+use crate::transpiler::{ExpectedToken, ParseErr};
 use crate::{Lexer, Token};
 
 #[derive(Debug)]
@@ -16,8 +16,8 @@ impl<'a> Node<'a> for UseDecl<'a> {
     }
 }
 
-impl<'a> UseDecl {
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseError<'a>>
+impl<'a> UseDecl<'a> {
+    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
     {
@@ -27,12 +27,12 @@ impl<'a> UseDecl {
             path.push(Ident::parse(lexer)?);
 
             match lexer.cur_next() {
-                Some(Token::Special { value: "::", .. }) => continue,
-                Some(Token::Special { value: ";", .. }) => break,
-                None => return Err(ParseError::PrematureEOF),
-                Some(v) => {
-                    return Err(ParseError::InvalidToken {
-                        got: v,
+                Some((Token::Special("::"), _)) => continue,
+                Some((Token::Special(";"), _)) => break,
+                None => return Err(ParseErr::PrematureEOF),
+                Some((val, _)) => {
+                    return Err(ParseErr::InvalidToken {
+                        got: val,
                         expected: vec![ExpectedToken::Special { regex: "::" }, ExpectedToken::Special { regex: ";" }],
                     })
                 }

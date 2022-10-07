@@ -1,10 +1,9 @@
 #![feature(once_cell)]
 #![feature(char_indices_offset)]
 
-use crate::ast::Ast;
 use std::error::Error;
 
-use crate::transpiler::{Lexer, ParseErrorInfo, Parser, Token};
+use crate::transpiler::{Lexer, Parser, Token};
 
 mod ast;
 mod transpiler;
@@ -15,7 +14,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut parser = Parser::new(&content);
 
     match parser.parse() {
-        Ok(v) => println!("{:#?}", v),
+        Ok(val) => println!("{:#?}", val),
         Err(e) => eprintln!("ERROR: {}", e),
     }
 

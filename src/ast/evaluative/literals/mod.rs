@@ -4,7 +4,7 @@ pub mod range;
 pub mod string;
 pub mod tuple;
 
-pub use char::*;
+pub use self::char::*;
 pub use numeric::*;
 pub use range::*;
 pub use string::*;
