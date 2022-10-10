@@ -1,7 +1,7 @@
 use crate::ast::evaluative::Expr;
 use crate::ast::Node;
-use crate::transpiler::ParseErr;
-use crate::Lexer;
+use crate::transpiler::{util, ExpectedToken, ParseErr, TokenLoc};
+use crate::{Lexer, Token};
 
 #[derive(Debug)]
 pub struct TupleLit<'a> {
@@ -23,6 +23,26 @@ impl<'a> TupleLit<'a> {
     where
         Self: Sized,
     {
-        todo!()
+        let mut values = Vec::new();
+
+        if let Some((Token::Special("]"), _)) = lexer.cur() {
+            return Ok(TupleLit { values });
+        }
+
+        loop {
+            values.push(Expr::parse(lexer)?);
+
+            match lexer.cur_next() {
+                None => return Err(ParseErr::PrematureEOF),
+                Some((Token::Special(","), _)) => continue,
+                Some((Token::Special("]"), _)) => return Ok(TupleLit { values }),
+                Some((val, _)) => {
+                    return Err(ParseErr::InvalidToken {
+                        got: val,
+                        expected: vec![ExpectedToken::Special { regex: "," }],
+                    })
+                }
+            }
+        }
     }
 }

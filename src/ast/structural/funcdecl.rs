@@ -70,7 +70,7 @@ impl<'a> FuncProto<'a> {
                     break;
                 }
                 Some((Token::Textual(_), _)) => args.push(FuncArg::parse(lexer)?),
-                Some(val) => {
+                Some((val, _)) => {
                     return Err(ParseErr::InvalidToken {
                         got: val,
                         expected: vec![

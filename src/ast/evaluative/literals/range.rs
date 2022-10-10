@@ -14,8 +14,9 @@ pub enum RangeOpenness {
 
 #[derive(Debug)]
 pub struct RangeLit<'a> {
-    from_to: NotNeither<Box<Expr<'a>>>,
-    openness: RangeOpenness,
+    pub from: Box<Expr<'a>>,
+    pub to: Box<Expr<'a>>,
+    pub openness: RangeOpenness,
 }
 
 impl<'a> Node<'a> for RangeLit<'a> {

@@ -24,14 +24,22 @@ impl<'a> Block<'a> {
 
         let mut lines = vec![];
 
+        if let Some((Token::Special("{"), _)) = lexer.cur() {
+            return Ok(Block { lines });
+        }
+
         loop {
+            lines.push(Line::parse(lexer)?);
+
+            println!("{:?}", lexer.cur());
+
             match lexer.cur() {
                 None => return Err(ParseErr::PrematureEOF),
                 Some((Token::Special("}"), _)) => {
-                    lexer.next_cur();
+                    lexer.skip();
                     break;
                 }
-                _ => lines.push(Line::parse(lexer)?),
+                _ => continue,
             }
         }
 

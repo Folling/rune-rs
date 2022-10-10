@@ -18,5 +18,7 @@ impl<'a> Node<'a> for TrialExpr<'a> {
 }
 
 impl<'a> TrialExpr<'a> {
-    pub fn parse(expr: Expr<'a>) -> Result<Self, ParseErr<'a>> {}
+    pub fn parse(expr: Expr<'a>) -> Result<Self, ParseErr<'a>> {
+        todo!()
+    }
 }

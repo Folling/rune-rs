@@ -25,6 +25,7 @@ pub enum LiteralType {
     Lambda,
 }
 
+#[derive(Debug)]
 pub enum ExpectedToken {
     Textual { regex: &'static str },
     Special { regex: &'static str },

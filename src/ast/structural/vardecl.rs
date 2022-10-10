@@ -44,7 +44,7 @@ impl<'a> VarDecl<'a> {
                 lexer.next_cur();
                 Some(Expr::parse(lexer)?)
             }
-            Some(val) => {
+            Some((val, _)) => {
                 return Err(ParseErr::InvalidToken {
                     got: val,
                     expected: vec![ExpectedToken::Special { regex: ";" }, ExpectedToken::Special { regex: "=" }],

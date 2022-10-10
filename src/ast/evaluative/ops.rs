@@ -24,7 +24,7 @@ pub struct BinaryOp {
 pub const UNARY_OPS: LazyCell<HashMap<&'static str, UnaryOp>> = LazyCell::new(|| {
     let mut ret = HashMap::with_capacity(64);
 
-    let insert = |ident, func_ident, prec| ret.insert(ident, UnaryOp { ident, func_ident, prec });
+    let mut insert = |ident, func_ident, prec| ret.insert(ident, UnaryOp { ident, func_ident, prec });
 
     insert("!", "inv", 0);
     insert("+", "pos", 0);
@@ -36,7 +36,7 @@ pub const UNARY_OPS: LazyCell<HashMap<&'static str, UnaryOp>> = LazyCell::new(||
 pub const BINARY_OPS: LazyCell<HashMap<&'static str, BinaryOp>> = LazyCell::new(|| {
     let mut ret = HashMap::with_capacity(64);
 
-    let binsert = |ident, func_ident, prec| ret.insert(ident, BinaryOp { ident, func_ident, prec });
+    let mut binsert = |ident, func_ident, prec| ret.insert(ident, BinaryOp { ident, func_ident, prec });
 
     binsert("<<", "shl", 1);
     binsert(">>", "shr", 1);

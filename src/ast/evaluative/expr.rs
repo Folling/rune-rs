@@ -1,14 +1,17 @@
-use crate::ast::evaluative::{BinOpExpr, CharLit, FuncCall, IfElseChain, NumLit, StringLit, TrialExpr, TupleLit, UnOpExpr};
+use crate::ast::evaluative::{
+    BinOpExpr, CharLit, FuncCall, IfElseChain, NumLit, RangeLit, RangeOpenness, StrLit, TrialExpr, TupleLit, UnOpExpr,
+};
 use crate::ast::Node;
-use crate::transpiler::ParseErr;
+use crate::transpiler::{ParseErr, TokenLoc};
 use crate::{Lexer, Token};
 
 #[derive(Debug)]
 pub enum Expr<'a> {
-    CharLiteral(CharLit<'a>),
-    StringLiteral(StringLit<'a>),
+    CharLit(CharLit<'a>),
+    StrLit(StrLit<'a>),
     NumLit(NumLit<'a>),
-    TupleLiteral(TupleLit<'a>),
+    RangeLit(RangeLit<'a>),
+    TupleLit(TupleLit<'a>),
     IfElseChain(IfElseChain<'a>),
     UnaryOp(UnOpExpr<'a>),
     BinaryOp(BinOpExpr<'a>),
@@ -21,10 +24,11 @@ impl<'a> Node<'a> for Expr<'a> {
 
     fn valid(&self) -> bool {
         match self {
-            Expr::CharLiteral(lit) => lit.valid(),
-            Expr::StringLiteral(lit) => lit.valid(),
+            Expr::CharLit(lit) => lit.valid(),
+            Expr::StrLit(lit) => lit.valid(),
             Expr::NumLit(lit) => lit.valid(),
-            Expr::TupleLiteral(lit) => lit.valid(),
+            Expr::RangeLit(lit) => lit.valid(),
+            Expr::TupleLit(lit) => lit.valid(),
             Expr::IfElseChain(chain) => chain.valid(),
             Expr::UnaryOp(op) => op.valid(),
             Expr::BinaryOp(op) => op.valid(),
@@ -39,15 +43,57 @@ impl<'a> Expr<'a> {
     where
         Self: Sized,
     {
-        match lexer.cur_next() {
+        let expr = match lexer.cur_next() {
             None => return Err(ParseErr::PrematureEOF),
-            Some((Token::Special("'"), _)) => Ok(Expr::CharLiteral(CharLit::parse(lexer)?)),
-            Some((Token::Special("\""), _)) => Ok(Expr::StringLiteral(StringLit::parse(lexer)?)),
+            Some((Token::Special("'"), _)) => Expr::CharLit(CharLit::parse(lexer)?),
+            Some((Token::Special("\""), _)) => Expr::StrLit(StrLit::parse(lexer)?),
             Some((Token::Textual(val), loc)) if matches!(val.chars().next(), Some('0'..='9')) => {
-                Ok(Expr::NumLit(NumLit::parse(lexer, val, loc)?))
+                Expr::NumLit(NumLit::parse(lexer, val, loc)?)
             }
-            Some((Token::Special("["), _)) => Ok(Expr::TupleLiteral(TupleLit::parse(lexer)?)),
+            Some((Token::Special("["), _)) => Expr::TupleLit(TupleLit::parse(lexer)?),
             Some(_) => todo!(),
-        }
+        };
+
+        let expr = match lexer.cur() {
+            Some((Token::Special(".."), _)) => {
+                lexer.skip();
+
+                Expr::RangeLit(RangeLit {
+                    from: Box::new(expr),
+                    to: Box::new(Expr::parse(lexer)?),
+                    openness: RangeOpenness::Open,
+                })
+            }
+            Some((Token::Special(">.."), _)) => {
+                lexer.skip();
+
+                Expr::RangeLit(RangeLit {
+                    from: Box::new(expr),
+                    to: Box::new(Expr::parse(lexer)?),
+                    openness: RangeOpenness::HalfOpenUpper,
+                })
+            }
+            Some((Token::Special("..<"), _)) => {
+                lexer.skip();
+
+                Expr::RangeLit(RangeLit {
+                    from: Box::new(expr),
+                    to: Box::new(Expr::parse(lexer)?),
+                    openness: RangeOpenness::HalfOpenLower,
+                })
+            }
+            Some((Token::Special(">..<"), _)) => {
+                lexer.skip();
+
+                Expr::RangeLit(RangeLit {
+                    from: Box::new(expr),
+                    to: Box::new(Expr::parse(lexer)?),
+                    openness: RangeOpenness::Closed,
+                })
+            }
+            _ => expr,
+        };
+
+        Ok(expr)
     }
 }

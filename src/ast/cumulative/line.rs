@@ -1,6 +1,6 @@
 use crate::ast::evaluative::{Expr, VarDecl};
 use crate::ast::Node;
-use crate::transpiler::ParseErr;
+use crate::transpiler::{util, ParseErr};
 use crate::{Lexer, Token};
 
 #[derive(Debug)]
@@ -30,18 +30,19 @@ impl<'a> Line<'a> {
     where
         Self: Sized,
     {
-        match lexer.cur_next() {
+        let line = match lexer.cur_next() {
             None => return Err(ParseErr::PrematureEOF),
             Some((Token::Textual("return"), _)) => match lexer.cur() {
                 None => return Err(ParseErr::PrematureEOF),
-                Some((Token::Special(";"), _)) => {
-                    lexer.next_cur();
-                    Ok(Line::Return(None))
-                }
-                _ => Ok(Line::Return(Some(Expr::parse(lexer)?))),
+                Some((Token::Special(";"), _)) => Line::Return(None),
+                _ => Line::Return(Some(Expr::parse(lexer)?)),
             },
-            Some((Token::Textual("var"), _)) => Ok(Line::VarDecl(VarDecl::parse(lexer)?)),
-            Some(_) => Ok(Line::Expr(Expr::parse(lexer)?)),
-        }
+            Some((Token::Textual("var"), _)) => Line::VarDecl(VarDecl::parse(lexer)?),
+            Some(_) => Line::Expr(Expr::parse(lexer)?),
+        };
+
+        util::exp_cur_next_sp_tok(lexer, ";")?;
+
+        Ok(line)
     }
 }

@@ -10,7 +10,7 @@ pub struct Lexer<'a> {
     live_pos: (usize, usize),
     last_token_pos: (usize, usize),
     specials: HashSet<&'static str>,
-    current_token: Option<Token<'a>>,
+    current_token: Option<(Token<'a>, TokenLoc)>,
 }
 
 impl<'a> Lexer<'a> {
@@ -24,7 +24,7 @@ impl<'a> Lexer<'a> {
             specials: [
                 "<", ">", "=", "==", "!=", "<=>", "<=", ">=", "<<", ">>", "<<=", ">>=", "&", "|", "^", "&&", "||", "^^", "&=", "|=", "^=",
                 "&&=", "||=", "^^=", "!", "-", "+", "/", "*", "&", "**", "//", "+=", "-=", "*=", "/=", "%=", "**=", "//=", "$", "\"", "\'",
-                "#", ",", ".", "..", ":", "::", "->", "(", ")", "[", "]", "{", "}", "?",
+                "#", ",", ".", "..", ">..", "..<", ">..<", ":", "::", "->", "(", ")", "[", "]", "{", "}", "?",
             ]
             .into_iter()
             .collect(),
@@ -125,7 +125,7 @@ impl<'a> Lexer<'a> {
         }
     }
 
-    pub fn peek(&mut self) -> Option<Token<'a>> {
+    pub fn peek(&mut self) -> Option<(Token<'a>, TokenLoc)> {
         let idx = self.idx;
         let token_idx = self.token_idx;
         let live_pos = self.live_pos;
@@ -138,24 +138,28 @@ impl<'a> Lexer<'a> {
         self.live_pos = live_pos;
         self.last_token_pos = last_pos;
 
-        ret.0
+        ret
     }
 
     pub fn cur_next(&mut self) -> Option<(Token<'a>, TokenLoc)> {
-        let ret = self.current_token;
+        let ret = self.cur();
 
-        self.current_token = self.next().0;
+        self.current_token = self.next();
 
-        ret.map(|val| (val, TokenLoc(self.token_idx, self.idx)))
+        ret
     }
 
-    pub fn next_cur(&mut self) -> Option<Token<'a>> {
-        self.current_token = self.next().0;
+    pub fn skip(&mut self) {
+        self.current_token = self.next();
+    }
+
+    pub fn next_cur(&mut self) -> Option<(Token<'a>, TokenLoc)> {
+        self.current_token = self.next();
 
         self.current_token
     }
 
-    pub fn cur(&self) -> Option<Token<'a>> {
+    pub fn cur(&self) -> Option<(Token<'a>, TokenLoc)> {
         self.current_token
     }
 

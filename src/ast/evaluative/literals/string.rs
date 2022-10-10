@@ -3,11 +3,11 @@ use crate::transpiler::{util, ExpectedToken, ParseErr};
 use crate::{Lexer, Token};
 
 #[derive(Debug)]
-pub struct StringLit<'a> {
+pub struct StrLit<'a> {
     value: &'a str,
 }
 
-impl<'a> Node<'a> for StringLit<'a> {
+impl<'a> Node<'a> for StrLit<'a> {
     fn generate(&self, content: &mut String) {
         todo!()
     }
@@ -17,7 +17,7 @@ impl<'a> Node<'a> for StringLit<'a> {
     }
 }
 
-impl<'a> StringLit<'a> {
+impl<'a> StrLit<'a> {
     pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
@@ -35,6 +35,6 @@ impl<'a> StringLit<'a> {
 
         util::exp_cur_next_sp_tok(lexer, "\"")?;
 
-        Ok(StringLit { value })
+        Ok(StrLit { value })
     }
 }
