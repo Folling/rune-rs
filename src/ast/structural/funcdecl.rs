@@ -69,21 +69,21 @@ impl<'a> FuncProto<'a> {
                     lexer.next_cur();
                     break;
                 }
-                Some((Token::Textual(_), _)) => args.push(FuncArg::parse(lexer)?),
+                Some(_) => args.push(FuncArg::parse(lexer)?),
                 Some((val, _)) => {
                     return Err(ParseErr::InvalidToken {
                         got: val,
                         expected: vec![
                             ExpectedToken::Special { regex: "," },
                             ExpectedToken::Special { regex: ")" },
-                            ExpectedToken::Textual { regex: "any text" },
+                            ExpectedToken::Special { regex: "valid ident" },
                         ],
                     })
                 }
             }
         }
 
-        util::exp_cur_next_sp_tok(lexer, "->")?;
+        util::exp_cur_next_sp_tok(lexer, "→")?;
 
         let ret = Type::parse(lexer)?;
 

@@ -1,5 +1,5 @@
 use core::io;
 
-fn main() -> i32 {
+fn main(\fn: i32) → i32 {
     return [1_u32, "hello", 'a', 2_u32..23_u32, 0x13_u32];
 };

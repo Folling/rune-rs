@@ -21,10 +21,70 @@ impl<'a> Lexer<'a> {
             idx: 0,
             live_pos: (0, 0),
             last_token_pos: (0, 0),
+            #[rustfmt::skip]
             specials: [
-                "<", ">", "=", "==", "!=", "<=>", "<=", ">=", "<<", ">>", "<<=", ">>=", "&", "|", "^", "&&", "||", "^^", "&=", "|=", "^=",
-                "&&=", "||=", "^^=", "!", "-", "+", "/", "*", "&", "**", "//", "+=", "-=", "*=", "/=", "%=", "**=", "//=", "$", "\"", "\'",
-                "#", ",", ".", "..", ">..", "..<", ">..<", ":", "::", "->", "(", ")", "[", "]", "{", "}", "?",
+                "<",    // smaller-than comparison
+                "≔<",   // smaller-than comparison assignment
+                "≤",    // smaller-than-equal comparison
+                "≔≤",   // smaller-than-equal comparison assignment
+                ">",    // larger-than comparison
+                "≔>",   // larger-than comparison assignment
+                "≥",    // larger-than-equal comparison
+                "≔≥",   // larger-than-equal comparison assignment
+                "=",    // equality comparison
+                "≔=",   // equality comparison assignment
+                "≠",    // inequality comparison
+                "≔≠",   // equality comparison assignment
+                "≡",    // identity comparison
+                "≔≡",   // identity comparison assignment
+                "<=>",  // three-way comparison
+                "≔<=>", // three-way comparison assignment
+                "≔",    // assignment
+                "<<",   // left shift
+                "≔<<",  // left shift assignment
+                ">>",   // right shift
+                "≔>>",  // right shift assignment
+                "∧",    // and
+                "≔∧",   // and assignment
+                "∨",    // or
+                "≔∨",   // or assignment
+                "⊕",    // xor
+                "≔⊕",   // xor assignment
+                "¬",    // logical negation
+                "≔¬",   // logical negation assignment
+                "-",    // negation/subtraction
+                "≔-",   // negation/subtraction assignment
+                "+",    // position (yes this word exists now)/addition
+                "≔+",   // position (yes this word exists now)/addition assignment
+                "/",    // division
+                "≔/",   // division assignment
+                "*",    // multiplication
+                "≔*",   // multiplication assignment
+                "**",   // exponentiation
+                "≔**",  // exponentiation assignment
+                "//",   // radicalization (also a word now)
+                "≔//",  // radicalization (also a word now) assignment
+                "$",    // string interpolation
+                "\"",   // string literal delimiter
+                "\'",   // character literal delimiter
+                "\\",   // raw literal indicator
+                "#",    // comment
+                ",",    // list separator
+                ".",    // method invocation indicator
+                "..",   // closed range literal indicator
+                ">..",  // half-lower-open range literal indicator
+                "..<",  // half-upper-open range literal indicator
+                ">..<", // open range literal indicator
+                ":",    // type indicator
+                "::",   // use path segment separator
+                "→",    // function return type indicator
+                "(",    // function args open-delimiter
+                ")",    // function args closing-delimiter
+                "[",    // tuple open-delimiter
+                "]",    // tuple closing-delimiter
+                "{",    // body opening-delimiter
+                "}",    // body closing-delimiter
+                "?",    // trial operator
             ]
             .into_iter()
             .collect(),
