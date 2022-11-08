@@ -50,8 +50,9 @@ impl<'a> Expr<'a> {
             Some((Token::Textual(val), loc)) if matches!(val.chars().next(), Some('0'..='9')) => {
                 Expr::NumLit(NumLit::parse(lexer, val, loc)?)
             }
+            Some((Token::Textual("if"), _)) => Expr::IfElseChain(IfElseChain::parse(lexer)?),
             Some((Token::Special("["), _)) => Expr::TupleLit(TupleLit::parse(lexer)?),
-            Some(_) => todo!(),
+            Some(v) => todo!("{:?}", v),
         };
 
         let expr = match lexer.cur() {

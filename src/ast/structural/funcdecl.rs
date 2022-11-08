@@ -34,7 +34,7 @@ impl<'a> FuncDecl<'a> {
     {
         Ok(FuncDecl {
             proto: FuncProto::parse(lexer)?,
-            body: Block::parse(lexer)?,
+            body: Block::parse(lexer, true)?,
         })
     }
 }
@@ -70,16 +70,6 @@ impl<'a> FuncProto<'a> {
                     break;
                 }
                 Some(_) => args.push(FuncArg::parse(lexer)?),
-                Some((val, _)) => {
-                    return Err(ParseErr::InvalidToken {
-                        got: val,
-                        expected: vec![
-                            ExpectedToken::Special { regex: "," },
-                            ExpectedToken::Special { regex: ")" },
-                            ExpectedToken::Special { regex: "valid ident" },
-                        ],
-                    })
-                }
             }
         }
 

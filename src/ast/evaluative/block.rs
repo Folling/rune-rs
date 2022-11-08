@@ -16,7 +16,7 @@ impl<'a> Node<'a> for Block<'a> {
 }
 
 impl<'a> Block<'a> {
-    pub fn parse(lexer: &mut Lexer<'a>) -> Result<Self, ParseErr<'a>>
+    pub fn parse(lexer: &mut Lexer<'a>, semicolon: bool) -> Result<Self, ParseErr<'a>>
     where
         Self: Sized,
     {
@@ -24,7 +24,8 @@ impl<'a> Block<'a> {
 
         let mut lines = vec![];
 
-        if let Some((Token::Special("{"), _)) = lexer.cur() {
+        if let Some((Token::Special("}"), _)) = lexer.cur() {
+            lexer.skip();
             return Ok(Block { lines });
         }
 
@@ -43,7 +44,9 @@ impl<'a> Block<'a> {
             }
         }
 
-        util::exp_cur_next_sp_tok(lexer, ";")?;
+        if semicolon {
+            util::exp_cur_next_sp_tok(lexer, ";")?;
+        }
 
         Ok(Block { lines })
     }

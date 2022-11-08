@@ -30,14 +30,17 @@ impl<'a> Line<'a> {
     where
         Self: Sized,
     {
-        let line = match lexer.cur_next() {
+        let line = match lexer.cur() {
             None => return Err(ParseErr::PrematureEOF),
-            Some((Token::Textual("return"), _)) => match lexer.cur() {
+            Some((Token::Textual("return"), _)) => match lexer.next_cur() {
                 None => return Err(ParseErr::PrematureEOF),
                 Some((Token::Special(";"), _)) => Line::Return(None),
                 _ => Line::Return(Some(Expr::parse(lexer)?)),
             },
-            Some((Token::Textual("var"), _)) => Line::VarDecl(VarDecl::parse(lexer)?),
+            Some((Token::Textual("var"), _)) => {
+                lexer.skip();
+                Line::VarDecl(VarDecl::parse(lexer)?)
+            }
             Some(_) => Line::Expr(Expr::parse(lexer)?),
         };
 

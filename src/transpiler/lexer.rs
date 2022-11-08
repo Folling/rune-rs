@@ -51,24 +51,23 @@ impl<'a> Lexer<'a> {
                 "⊕",    // xor
                 "≔⊕",   // xor assignment
                 "¬",    // logical negation
-                "≔¬",   // logical negation assignment
                 "-",    // negation/subtraction
-                "≔-",   // negation/subtraction assignment
+                "≔-",   // subtraction assignment
                 "+",    // position (yes this word exists now)/addition
-                "≔+",   // position (yes this word exists now)/addition assignment
+                "≔+",   // addition assignment
                 "/",    // division
                 "≔/",   // division assignment
-                "*",    // multiplication
-                "≔*",   // multiplication assignment
-                "**",   // exponentiation
+                "⋅",    // multiplication
+                "≔⋅",   // multiplication assignment
+                "^",   // exponentiation
                 "≔**",  // exponentiation assignment
-                "//",   // radicalization (also a word now)
-                "≔//",  // radicalization (also a word now) assignment
+                "√",    // radicalization (also a word now)
+                "≔√",   // radicalization (also a word now) assignment
                 "$",    // string interpolation
                 "\"",   // string literal delimiter
                 "\'",   // character literal delimiter
                 "\\",   // raw literal indicator
-                "#",    // comment
+                "|",    // comment
                 ",",    // list separator
                 ".",    // method invocation indicator
                 "..",   // closed range literal indicator
