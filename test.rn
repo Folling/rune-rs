@@ -3,9 +3,10 @@ use core::io;
 fn main(\fn: i32) → i32 {
     if 5_u32 {
 
-    } else if 2.0_f32 {
+    } else if 2.0_f32?.."hi" {
 
     } else {
+
     };
 
     return [1_u32, "hello", 'a', 2_u32..23_u32, 0x13_u32];

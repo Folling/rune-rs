@@ -43,7 +43,7 @@ impl<'a> Expr<'a> {
     where
         Self: Sized,
     {
-        let expr = match lexer.cur_next() {
+        let mut expr = match lexer.cur_next() {
             None => return Err(ParseErr::PrematureEOF),
             Some((Token::Special("'"), _)) => Expr::CharLit(CharLit::parse(lexer)?),
             Some((Token::Special("\""), _)) => Expr::StrLit(StrLit::parse(lexer)?),
@@ -55,45 +55,51 @@ impl<'a> Expr<'a> {
             Some(v) => todo!("{:?}", v),
         };
 
-        let expr = match lexer.cur() {
-            Some((Token::Special(".."), _)) => {
-                lexer.skip();
+        loop {
+            expr = match lexer.cur() {
+                Some((Token::Special(".."), _)) => {
+                    lexer.skip();
 
-                Expr::RangeLit(RangeLit {
-                    from: Box::new(expr),
-                    to: Box::new(Expr::parse(lexer)?),
-                    openness: RangeOpenness::Open,
-                })
-            }
-            Some((Token::Special(">.."), _)) => {
-                lexer.skip();
+                    Expr::RangeLit(RangeLit {
+                        from: Box::new(expr),
+                        to: Box::new(Expr::parse(lexer)?),
+                        openness: RangeOpenness::Open,
+                    })
+                }
+                Some((Token::Special(">.."), _)) => {
+                    lexer.skip();
 
-                Expr::RangeLit(RangeLit {
-                    from: Box::new(expr),
-                    to: Box::new(Expr::parse(lexer)?),
-                    openness: RangeOpenness::HalfOpenUpper,
-                })
-            }
-            Some((Token::Special("..<"), _)) => {
-                lexer.skip();
+                    Expr::RangeLit(RangeLit {
+                        from: Box::new(expr),
+                        to: Box::new(Expr::parse(lexer)?),
+                        openness: RangeOpenness::HalfOpenUpper,
+                    })
+                }
+                Some((Token::Special("..<"), _)) => {
+                    lexer.skip();
 
-                Expr::RangeLit(RangeLit {
-                    from: Box::new(expr),
-                    to: Box::new(Expr::parse(lexer)?),
-                    openness: RangeOpenness::HalfOpenLower,
-                })
-            }
-            Some((Token::Special(">..<"), _)) => {
-                lexer.skip();
+                    Expr::RangeLit(RangeLit {
+                        from: Box::new(expr),
+                        to: Box::new(Expr::parse(lexer)?),
+                        openness: RangeOpenness::HalfOpenLower,
+                    })
+                }
+                Some((Token::Special(">..<"), _)) => {
+                    lexer.skip();
 
-                Expr::RangeLit(RangeLit {
-                    from: Box::new(expr),
-                    to: Box::new(Expr::parse(lexer)?),
-                    openness: RangeOpenness::Closed,
-                })
+                    Expr::RangeLit(RangeLit {
+                        from: Box::new(expr),
+                        to: Box::new(Expr::parse(lexer)?),
+                        openness: RangeOpenness::Closed,
+                    })
+                }
+                Some((Token::Special("?"), _)) => {
+                    lexer.skip();
+                    Expr::TrialExpr(TrialExpr { expr: Box::new(expr) })
+                }
+                _ => break,
             }
-            _ => expr,
-        };
+        }
 
         Ok(expr)
     }

@@ -4,7 +4,7 @@ use crate::transpiler::ParseErr;
 
 #[derive(Debug)]
 pub struct TrialExpr<'a> {
-    expr: Box<Expr<'a>>,
+    pub expr: Box<Expr<'a>>,
 }
 
 impl<'a> Node<'a> for TrialExpr<'a> {
