@@ -32,9 +32,9 @@ impl<'a> NumLit<'a> {
                         Some((Token::Special("_"), _)) => match lexer.cur_next() {
                             None => Err(ParseErr::PrematureEOF),
                             Some((Token::Textual(val), _)) if ["f32", "f64"].contains(&val) => Ok(Self { value, r#type: val }),
-                            Some((val, _)) => Err(ParseErr::InvalidLiteral {
+                            Some((val, loc2)) => Err(ParseErr::InvalidLiteral {
                                 r#type: LiteralType::Numeric,
-                                got: value,
+                                got: unsafe { lexer.get_from_to(loc, loc2) },
                                 expected: "(f32|f64)",
                             }),
                         },

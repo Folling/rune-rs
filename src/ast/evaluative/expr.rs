@@ -52,7 +52,7 @@ impl<'a> Expr<'a> {
             }
             Some((Token::Textual("if"), _)) => Expr::IfElseChain(IfElseChain::parse(lexer)?),
             Some((Token::Special("["), _)) => Expr::TupleLit(TupleLit::parse(lexer)?),
-            Some(v) => todo!("{:?}", v),
+            Some((Token::Textual(v), _)) => {}
         };
 
         loop {

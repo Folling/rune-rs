@@ -77,6 +77,7 @@ impl<'a> Lexer<'a> {
                 ":",    // type indicator
                 "::",   // use path segment separator
                 "→",    // function return type indicator
+                "←",    // return indicator
                 "(",    // function args open-delimiter
                 ")",    // function args closing-delimiter
                 "[",    // tuple open-delimiter
